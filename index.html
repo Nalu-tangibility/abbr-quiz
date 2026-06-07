@@ -4,589 +4,889 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>略語クイズ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fdf6ff;--surface:#ffffff;--surface2:#f5eeff;--border:#e8d5ff;
+  --text:#2d1b69;--text-sub:#9b7ec8;
+  --accent:#a855f7;--accent2:#ec4899;--accent-light:#f3e8ff;
+  --correct:#10b981;--correct-light:#d1fae5;
+  --wrong:#f43f5e;--wrong-light:#ffe4e6;
+  --gold:#f59e0b;--shadow:rgba(168,85,247,0.15);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;padding:20px 16px 60px;overflow-x:hidden;position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle,#e9d5ff 1.5px,transparent 1.5px);
+  background-size:28px 28px;opacity:0.5;pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;top:0;left:0;right:0;height:280px;
+  background:linear-gradient(180deg,#f3e8ff 0%,transparent 100%);
+  pointer-events:none;z-index:0;
+}
+body>*{position:relative;z-index:1}
 
-  :root {
-    --bg: #f7f5f0;
-    --surface: #ffffff;
-    --text: #1a1a1a;
-    --text-sub: #6b6b6b;
-    --border: #e0ddd6;
-    --accent: #2a5caa;
-    --accent-light: #e8eef8;
-    --correct: #1a7a4a;
-    --correct-light: #e6f5ec;
-    --wrong: #c0392b;
-    --wrong-light: #fdecea;
-    --neutral: #8c8c8c;
-  }
+/* 音量トグル */
+.sound-toggle{
+  position:fixed;top:16px;right:16px;z-index:50;
+  width:40px;height:40px;border-radius:12px;
+  border:2px solid var(--border);background:var(--surface);
+  cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;box-shadow:0 2px 8px var(--shadow);
+}
+.sound-toggle:hover{border-color:var(--accent);background:var(--accent-light)}
+.sound-toggle.muted{opacity:0.5}
 
-  body {
-    font-family: 'Helvetica Neue', 'Hiragino Sans', 'Meiryo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 16px 48px;
-  }
+/* ---- ホーム ---- */
+#home-screen{width:100%;max-width:480px;display:flex;flex-direction:column;align-items:center;padding-top:12px}
+.home-mascot{font-size:80px;margin-bottom:8px;animation:float 3s ease-in-out infinite;display:block;text-align:center}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.home-title{
+  font-family:'Nunito',sans-serif;font-size:38px;font-weight:900;
+  text-align:center;margin-bottom:6px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2;
+}
+.home-sub{font-size:13px;color:var(--text-sub);text-align:center;margin-bottom:32px}
+.home-stats-row{display:flex;gap:12px;margin-bottom:32px;width:100%;justify-content:center}
+.home-stat{
+  background:var(--surface);border:2px solid var(--border);border-radius:16px;
+  padding:14px 20px;text-align:center;flex:1;max-width:130px;
+  box-shadow:0 4px 16px var(--shadow);
+}
+.home-stat .hs-num{font-family:'Nunito',sans-serif;font-size:28px;font-weight:900;color:var(--accent);line-height:1}
+.home-stat .hs-label{font-size:11px;color:var(--text-sub);margin-top:3px;font-weight:700}
+.home-play-btn{
+  width:100%;padding:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;border-radius:20px;font-size:18px;font-weight:900;
+  cursor:pointer;margin-bottom:12px;font-family:'Nunito',sans-serif;
+  letter-spacing:0.03em;box-shadow:0 8px 24px rgba(168,85,247,0.35);
+  transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.home-play-btn:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(168,85,247,0.45)}
+.home-play-btn:active{transform:translateY(0)}
+.home-genre-btn{
+  width:100%;padding:15px;background:var(--surface);color:var(--accent);
+  border:2px solid var(--border);border-radius:20px;font-size:15px;font-weight:700;
+  cursor:pointer;font-family:'Noto Sans JP',sans-serif;
+  transition:all 0.2s;box-shadow:0 4px 12px var(--shadow);
+}
+.home-genre-btn:hover{border-color:var(--accent);background:var(--accent-light)}
+.home-deco{display:flex;gap:16px;margin-top:28px;font-size:28px;opacity:0.4}
 
-  header {
-    width: 100%;
-    max-width: 560px;
-    margin-bottom: 20px;
-  }
+.weak-btn{
+  width:100%;margin-top:12px;padding:15px 20px;
+  background:var(--wrong-light);
+  border:2px solid #fda4af;
+  border-radius:18px;font-size:15px;font-weight:700;
+  color:var(--wrong);cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  transition:all 0.2s;font-family:'Noto Sans JP',sans-serif;
+  box-shadow:0 4px 12px rgba(244,63,94,0.12);
+}
+.weak-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(244,63,94,0.2);border-color:var(--wrong)}
+.weak-badge{
+  background:var(--wrong);color:#fff;
+  padding:3px 10px;border-radius:20px;
+  font-size:12px;font-weight:900;font-family:'Nunito',sans-serif;
+}
+.weak-clear-btn{
+  margin-top:8px;background:none;border:none;
+  color:var(--text-sub);font-size:11px;cursor:pointer;
+  text-decoration:underline;font-family:'Noto Sans JP',sans-serif;
+  padding:4px;
+}
+.weak-clear-btn:hover{color:var(--wrong)}
 
-  h1 {
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 4px;
-  }
+/* ---- ジャンル ---- */
+#genre-screen{width:100%;max-width:480px;display:none}
+.page-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.back-icon-btn{
+  width:40px;height:40px;border-radius:12px;border:2px solid var(--border);
+  background:var(--surface);cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;
+}
+.back-icon-btn:hover{border-color:var(--accent);background:var(--accent-light)}
+.page-title{font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--text)}
+.genre-all-btn{
+  width:100%;background:linear-gradient(135deg,#f3e8ff,#fce7f3);
+  border:2px solid var(--border);border-radius:18px;padding:18px 20px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;
+  transition:all 0.2s;box-shadow:0 4px 16px var(--shadow);
+}
+.genre-all-btn:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px var(--shadow)}
+.genre-all-btn .g-name{font-size:16px;font-weight:900;color:var(--accent);font-family:'Nunito',sans-serif}
+.genre-all-btn .g-count{font-size:13px;color:var(--text-sub);font-weight:700}
+.genre-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.genre-btn{
+  background:var(--surface);border:2px solid var(--border);border-radius:16px;
+  padding:16px 14px;cursor:pointer;text-align:left;transition:all 0.2s;
+  box-shadow:0 2px 8px var(--shadow);
+}
+.genre-btn:hover{border-color:var(--accent);background:var(--accent-light);transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow)}
+.genre-btn .g-icon{font-size:26px;margin-bottom:6px;display:block}
+.genre-btn .g-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.genre-btn .g-count{font-size:11px;color:var(--text-sub)}
 
-  .subtitle {
-    font-size: 13px;
-    color: var(--text-sub);
-  }
+/* ---- クイズ ---- */
+#quiz-screen{display:none;width:100%;max-width:480px}
+.quiz-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.prog-wrap{flex:1;height:10px;background:var(--border);border-radius:5px;overflow:hidden}
+.prog-bar{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:5px;transition:width 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.q-num-badge{
+  background:var(--surface);border:2px solid var(--border);border-radius:10px;
+  padding:4px 12px;font-size:12px;font-weight:700;color:var(--text-sub);white-space:nowrap;
+}
+.score-row{display:flex;gap:6px;margin-bottom:14px;align-items:center;flex-wrap:nowrap;overflow:hidden;min-width:0}
+.chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;border:2px solid;white-space:nowrap;flex-shrink:0}
+.chip-ok{border-color:var(--correct);color:var(--correct);background:var(--correct-light)}
+.chip-ng{border-color:var(--wrong);color:var(--wrong);background:var(--wrong-light)}
+.combo-badge{
+  margin-left:auto;padding:4px 10px;border-radius:20px;font-size:11px;
+  font-weight:900;font-family:'Nunito',sans-serif;transition:all 0.3s;opacity:0;transform:scale(0.8);
+  white-space:nowrap;flex-shrink:0;max-width:160px;overflow:hidden;text-overflow:ellipsis;
+}
+.combo-badge.show{opacity:1;transform:scale(1)}
+.cb1{background:#e0f2fe;color:#0284c7;border:2px solid #bae6fd}
+.cb2{background:#d1fae5;color:#059669;border:2px solid #a7f3d0}
+.cb3{background:#fef3c7;color:#d97706;border:2px solid #fde68a}
+.cb4{background:#ffe4e6;color:#e11d48;border:2px solid #fecdd3}
+.cb5{background:linear-gradient(135deg,#f3e8ff,#fce7f3);color:var(--accent);border:2px solid var(--border);animation:comboPulse 0.8s ease infinite}
+.cb-god{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:2px solid var(--accent);animation:comboPulse 0.4s ease infinite;box-shadow:0 0 10px rgba(168,85,247,0.5)}
+.cb6{background:linear-gradient(135deg,#fce7f3,#ffe4e6);color:#db2777;border:2px solid #fbcfe8;animation:comboPulse 0.7s ease infinite}
+.cb7{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#b45309;border:2px solid #fcd34d;animation:comboPulse 0.6s ease infinite}
+.cb8{background:linear-gradient(135deg,#ffe4e6,#fecdd3);color:#be123c;border:2px solid #fda4af;animation:comboPulse 0.5s ease infinite}
+.cb9{background:linear-gradient(135deg,#f3e8ff,#e0f2fe);color:#7c3aed;border:2px solid #c4b5fd;animation:comboPulse 0.4s ease infinite}
+.cb10{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:2px solid var(--accent);animation:comboPulse 0.3s ease infinite;box-shadow:0 0 12px rgba(168,85,247,0.4)}
+@keyframes comboPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 
-  /* ジャンル選択 */
-  #genre-screen {
-    width: 100%;
-    max-width: 560px;
-  }
+.q-card{
+  background:var(--surface);border:2px solid var(--border);border-radius:24px;
+  padding:28px 24px 24px;text-align:center;margin-bottom:14px;
+  box-shadow:0 8px 32px var(--shadow);
+  transition:border-color 0.3s,box-shadow 0.3s,transform 0.15s;
+  position:relative;overflow:hidden;
+}
+.q-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:24px 24px 0 0;
+}
+.q-card.flash-correct{border-color:var(--correct);box-shadow:0 8px 40px rgba(16,185,129,0.25);animation:bumpCorrect 0.35s cubic-bezier(0.34,1.56,0.64,1)}
+.q-card.flash-wrong{border-color:var(--wrong);box-shadow:0 8px 40px rgba(244,63,94,0.2);animation:shakeCard 0.35s ease}
+@keyframes bumpCorrect{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+@keyframes shakeCard{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-  .genre-title {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--text-sub);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 12px;
-  }
+.q-genre-tag{
+  display:inline-block;font-size:11px;font-weight:700;color:var(--accent);
+  background:var(--accent-light);border:1.5px solid var(--border);
+  padding:3px 12px;border-radius:20px;margin-bottom:16px;letter-spacing:0.04em;
+}
+.q-prompt{font-size:12px;color:var(--text-sub);margin-bottom:8px;font-weight:700;letter-spacing:0.08em}
+.q-abbr{
+  font-family:'Nunito',sans-serif;font-size:58px;font-weight:900;line-height:1.1;
+  margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.q-full{font-size:12px;color:var(--text-sub);min-height:16px;font-weight:500}
 
-  .genre-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.choice-btn{
+  background:var(--surface);border:2px solid var(--border);border-radius:16px;
+  padding:16px 12px;font-size:13px;font-weight:700;cursor:pointer;
+  text-align:center;line-height:1.4;transition:all 0.15s;color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;box-shadow:0 2px 8px var(--shadow);
+}
+.choice-btn:hover:not(:disabled){border-color:var(--accent);background:var(--accent-light);transform:translateY(-3px);box-shadow:0 6px 20px var(--shadow)}
+.choice-btn:disabled{cursor:default}
+.choice-btn.correct{border-color:var(--correct);background:var(--correct-light);color:var(--correct);box-shadow:0 4px 16px rgba(16,185,129,0.2);animation:popIn 0.35s cubic-bezier(0.34,1.56,0.64,1)}
+.choice-btn.wrong{border-color:var(--wrong);background:var(--wrong-light);color:var(--wrong);animation:shakeChoice 0.35s ease}
+.choice-btn.dim{opacity:0.3;transform:none!important;box-shadow:none!important}
+@keyframes popIn{0%{transform:scale(0.9)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes shakeChoice{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
-  .genre-btn {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
+.feedback-box{border-radius:16px;padding:12px 16px;margin-bottom:12px;font-size:13px;line-height:1.6;display:none;border:2px solid;font-weight:700}
+.feedback-box.correct{background:var(--correct-light);border-color:#6ee7b7;color:#065f46}
+.feedback-box.wrong{background:var(--wrong-light);border-color:#fda4af;color:#9f1239}
+.feedback-box .ans-highlight{font-weight:900;color:var(--correct)}
 
-  .genre-btn:hover { border-color: var(--accent); background: var(--accent-light); }
-  .genre-btn.selected { border-color: var(--accent); background: var(--accent-light); }
+.next-btn{
+  width:100%;padding:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;border-radius:16px;font-size:15px;font-weight:900;
+  cursor:pointer;display:none;font-family:'Nunito',sans-serif;letter-spacing:0.03em;
+  box-shadow:0 6px 20px rgba(168,85,247,0.3);transition:all 0.2s;
+}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(168,85,247,0.4)}
 
-  .genre-btn .g-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-  .genre-btn .g-count { font-size: 12px; color: var(--text-sub); }
+/* パーティクル */
+#particle-canvas{position:fixed;inset:0;pointer-events:none;z-index:100}
 
-  .genre-btn-all {
-    background: var(--text);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 14px 16px;
-    cursor: pointer;
-    text-align: left;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.15s;
-    margin-bottom: 8px;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+/* コンボポップアップ */
+#combo-popup{
+  position:fixed;top:32%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Nunito',sans-serif;font-size:60px;font-weight:900;
+  pointer-events:none;z-index:200;opacity:0;text-align:center;
+  text-shadow:0 4px 20px rgba(0,0,0,0.15);
+}
+@keyframes comboAnim{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(0.4) rotate(-8deg)}
+  30%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(3deg)}
+  70%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg)}
+  100%{opacity:0;transform:translate(-50%,-65%) scale(0.85) rotate(0deg)}
+}
 
-  .genre-btn-all:hover { opacity: 0.85; }
+/* ---- リザルト ---- */
+#result-screen{display:none;width:100%;max-width:480px}
+.result-card{
+  background:var(--surface);border:2px solid var(--border);border-radius:24px;
+  padding:36px 24px 28px;text-align:center;margin-bottom:14px;
+  box-shadow:0 8px 32px var(--shadow),0 0 0 4px rgba(168,85,247,0.08);
+  position:relative;overflow:hidden;
+}
+.result-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:6px;
+  background:linear-gradient(90deg,var(--gold),var(--accent2),var(--accent),var(--correct));
+  border-radius:24px 24px 0 0;
+}
+.result-card::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(168,85,247,0.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.result-mascot{font-size:72px;display:block;margin-bottom:8px;animation:float 2.5s ease-in-out infinite}
+.result-title{
+  font-family:'Nunito',sans-serif;font-size:36px;font-weight:900;margin-bottom:6px;
+  background:linear-gradient(135deg,var(--gold),var(--accent2),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 2px 6px rgba(168,85,247,0.25));
+}
+.result-pct{
+  font-family:'Nunito',sans-serif;font-size:80px;font-weight:900;line-height:1;
+  background:linear-gradient(135deg,var(--accent),var(--accent2),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin:10px 0 4px;filter:drop-shadow(0 2px 8px rgba(168,85,247,0.3));
+}
+.result-sub{font-size:13px;color:var(--text-sub);margin-bottom:20px;font-weight:700}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:0}
+.stat-box{
+  background:var(--surface2);border:2px solid var(--border);border-radius:16px;
+  padding:16px 8px;text-align:center;
+  box-shadow:0 4px 12px var(--shadow);
+  position:relative;overflow:hidden;
+}
+.stat-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.sbox-ok::before{background:linear-gradient(90deg,var(--correct),#34d399)}
+.sbox-ng::before{background:linear-gradient(90deg,var(--wrong),#fb7185)}
+.sbox-combo::before{background:linear-gradient(90deg,var(--gold),#fbbf24)}
+.stat-box .s-num{font-family:'Nunito',sans-serif;font-size:32px;font-weight:900;line-height:1}
+.stat-box .s-label{font-size:10px;color:var(--text-sub);margin-top:4px;font-weight:700;letter-spacing:0.05em}
+.sbox-ok .s-num{color:var(--correct)}.sbox-ng .s-num{color:var(--wrong)}.sbox-combo .s-num{color:var(--gold)}
+.miss-section{margin-top:20px;text-align:left}
+.miss-title{font-size:11px;font-weight:900;letter-spacing:0.15em;color:var(--text-sub);text-transform:uppercase;margin-bottom:10px}
+.miss-item{background:var(--surface2);border:2px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.miss-abbr{font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;color:var(--wrong);min-width:56px;text-align:center}
+.miss-meaning{font-size:13px;font-weight:700;color:var(--text);margin-bottom:1px}
+.miss-full{font-size:11px;color:var(--text-sub)}
+.retry-btn{
+  width:100%;padding:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2),var(--gold));
+  background-size:200% 200%;
+  color:#fff;border:none;border-radius:18px;font-size:17px;font-weight:900;
+  cursor:pointer;margin-bottom:10px;font-family:'Nunito',sans-serif;
+  box-shadow:0 8px 28px rgba(168,85,247,0.4),0 0 0 0 rgba(168,85,247,0.2);
+  transition:all 0.2s;
+  animation:btnPulse 2.5s ease infinite;
+  letter-spacing:0.03em;
+}
+.retry-btn:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(168,85,247,0.5);animation:none}
+@keyframes btnPulse{
+  0%,100%{box-shadow:0 8px 28px rgba(168,85,247,0.4),0 0 0 0 rgba(168,85,247,0.3)}
+  50%{box-shadow:0 8px 28px rgba(168,85,247,0.4),0 0 0 10px rgba(168,85,247,0)}
+}
+.home-back-btn{width:100%;padding:14px;background:var(--surface);border:2px solid var(--border);border-radius:18px;font-size:14px;font-weight:700;color:var(--text-sub);cursor:pointer;transition:all 0.2s;font-family:'Noto Sans JP',sans-serif}
+.home-back-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
 
-  .start-btn {
-    width: 100%;
-    padding: 16px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: all 0.15s;
-    letter-spacing: 0.02em;
-  }
-  .start-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-  .start-btn:active { transform: translateY(0); }
-
-  /* クイズ画面 */
-  #quiz-screen { display: none; width: 100%; max-width: 560px; }
-
-  .quiz-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .progress-wrap {
-    flex: 1;
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .progress-bar {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 3px;
-    transition: width 0.3s ease;
-  }
-
-  .q-counter {
-    font-size: 13px;
-    color: var(--text-sub);
-    white-space: nowrap;
-  }
-
-  .score-disp {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .score-chip {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .chip-correct { background: var(--correct-light); color: var(--correct); }
-  .chip-wrong   { background: var(--wrong-light);   color: var(--wrong); }
-
-  /* 問題カード */
-  .question-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px 28px 28px;
-    text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  }
-
-  .q-genre-tag {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--accent);
-    background: var(--accent-light);
-    padding: 3px 10px;
-    border-radius: 20px;
-    margin-bottom: 16px;
-    letter-spacing: 0.04em;
-  }
-
-  .q-prompt {
-    font-size: 13px;
-    color: var(--text-sub);
-    margin-bottom: 8px;
-  }
-
-  .q-abbr {
-    font-size: 52px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
-    margin-bottom: 10px;
-    color: var(--text);
-  }
-
-  .q-full {
-    font-size: 14px;
-    color: var(--text-sub);
-    min-height: 20px;
-  }
-
-  /* 選択肢 */
-  .choices {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .choice-btn {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 14px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    text-align: center;
-    line-height: 1.4;
-    transition: all 0.12s;
-    color: var(--text);
-  }
-
-  .choice-btn:hover:not(:disabled) {
-    border-color: var(--accent);
-    background: var(--accent-light);
-  }
-
-  .choice-btn:disabled { cursor: default; }
-  .choice-btn.correct  { border-color: var(--correct); background: var(--correct-light); color: var(--correct); font-weight: 700; }
-  .choice-btn.wrong    { border-color: var(--wrong); background: var(--wrong-light); color: var(--wrong); }
-  .choice-btn.dim      { opacity: 0.35; }
-
-  /* フィードバック */
-  .feedback-box {
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    display: none;
-    line-height: 1.6;
-  }
-
-  .feedback-box.correct { background: var(--correct-light); color: var(--correct); border: 1px solid #a8dfc0; }
-  .feedback-box.wrong   { background: var(--wrong-light);   color: var(--wrong);   border: 1px solid #f5b4ae; }
-
-  .next-btn {
-    width: 100%;
-    padding: 15px;
-    background: var(--text);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    display: none;
-    transition: all 0.15s;
-  }
-  .next-btn:hover { opacity: 0.85; }
-
-  /* リザルト画面 */
-  #result-screen {
-    display: none;
-    width: 100%;
-    max-width: 560px;
-    text-align: center;
-  }
-
-  .result-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 40px 28px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  }
-
-  .result-emoji { font-size: 56px; margin-bottom: 16px; }
-  .result-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
-  .result-score { font-size: 48px; font-weight: 900; color: var(--accent); margin: 16px 0 4px; }
-  .result-sub   { font-size: 15px; color: var(--text-sub); margin-bottom: 24px; }
-
-  .result-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    text-align: center;
-    margin-bottom: 8px;
-  }
-
-  .stat-box {
-    background: var(--bg);
-    border-radius: 10px;
-    padding: 14px;
-  }
-  .stat-box .s-num { font-size: 26px; font-weight: 800; }
-  .stat-box .s-label { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
-  .stat-correct .s-num { color: var(--correct); }
-  .stat-wrong   .s-num { color: var(--wrong); }
-
-  .retry-btn {
-    width: 100%;
-    padding: 16px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    margin-bottom: 10px;
-  }
-  .retry-btn:hover { opacity: 0.9; }
-
-  .back-btn {
-    width: 100%;
-    padding: 14px;
-    background: transparent;
-    color: var(--text-sub);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .back-btn:hover { background: var(--surface); color: var(--text); }
+/* ---- レスポンシブ ---- */
+@media(max-width:480px){
+  .home-title{font-size:30px}.home-mascot{font-size:64px}
+  .q-abbr{font-size:46px}.result-pct{font-size:58px}
+  .result-title{font-size:28px}.result-mascot{font-size:58px}
+  .home-stats-row{gap:8px}.home-stat{padding:12px 14px}.home-stat .hs-num{font-size:22px}
+}
+@media(max-width:360px){
+  .q-abbr{font-size:38px}.choices{grid-template-columns:1fr}.home-title{font-size:26px}
+}
+@media(min-width:640px){
+  body{padding:32px 24px 80px}
+  .q-abbr{font-size:72px}.home-title{font-size:44px}
+  .home-mascot{font-size:96px}.result-mascot{font-size:80px}
+  .result-pct{font-size:88px}.result-title{font-size:40px}
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>略語クイズ</h1>
-  <p class="subtitle">497問収録 ・ ジャンル別4択</p>
-</header>
+<canvas id="particle-canvas"></canvas>
+<div id="combo-popup"></div>
 
-<!-- ジャンル選択 -->
-<div id="genre-screen">
-  <p class="genre-title">ジャンルを選ぶ</p>
+<!-- 音量トグル -->
+<button class="sound-toggle" id="sound-toggle" onclick="toggleSound()" title="音のON/OFF">🔊</button>
 
-  <button class="genre-btn-all" onclick="startQuiz('all')">
-    <span>🌐 すべてのジャンル</span>
-    <span style="font-size:13px;opacity:.7">497問</span>
+<!-- ホーム -->
+<div id="home-screen">
+  <span class="home-mascot">🧠</span>
+  <div class="home-title">略語クイズ</div>
+  <div class="home-sub">497問収録 · 9ジャンル · 4択形式</div>
+  <div class="home-stats-row">
+    <div class="home-stat"><div class="hs-num">497</div><div class="hs-label">総問題数</div></div>
+    <div class="home-stat"><div class="hs-num">9</div><div class="hs-label">ジャンル</div></div>
+    <div class="home-stat"><div class="hs-num">10</div><div class="hs-label">1ラウンド</div></div>
+  </div>
+  <button class="home-play-btn" onclick="goGenre()">✨ はじめる</button>
+  <button class="home-genre-btn" onclick="goGenre()">ジャンルを選んでスタート →</button>
+  <button class="weak-btn" id="weak-btn" onclick="startWeakQuiz()" style="display:none">
+    <span>📌 苦手問題集</span>
+    <span class="weak-badge" id="weak-count">0</span>
   </button>
+  <button class="weak-clear-btn" onclick="if(confirm('苦手リストをリセットしますか？'))clearWeak()">リセット</button>
+  <div class="home-deco"><span>💼</span><span>💻</span><span>📱</span><span>🎬</span><span>✈️</span></div>
+</div>
 
+<!-- ジャンル -->
+<div id="genre-screen">
+  <div class="page-header">
+    <button class="back-icon-btn" onclick="goHome()">←</button>
+    <div class="page-title">ジャンル選択</div>
+  </div>
+  <button class="genre-all-btn" onclick="startQuiz('all')">
+    <span class="g-name">🌐 ALL GENRES</span>
+    <span class="g-count">497問</span>
+  </button>
   <div class="genre-grid" id="genre-grid"></div>
 </div>
 
 <!-- クイズ -->
 <div id="quiz-screen">
-  <div class="quiz-header">
-    <div class="progress-wrap"><div class="progress-bar" id="prog-bar"></div></div>
-    <div class="q-counter" id="q-counter">1 / 10</div>
+  <div class="quiz-top">
+    <div class="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
+    <div class="q-num-badge" id="q-num">1/10</div>
   </div>
-  <div class="score-disp">
-    <span class="score-chip chip-correct">✓ <span id="sc-correct">0</span></span>
-    <span class="score-chip chip-wrong">✗ <span id="sc-wrong">0</span></span>
+  <div class="score-row">
+    <span class="chip chip-ok">✓ <span id="sc-ok">0</span></span>
+    <span class="chip chip-ng">✗ <span id="sc-ng">0</span></span>
+    <div class="combo-badge" id="combo-badge"></div>
   </div>
-
-  <div class="question-card">
-    <div class="q-genre-tag" id="q-genre">—</div>
+  <div class="q-card" id="q-card">
+    <div class="q-genre-tag" id="q-genre"></div>
     <div class="q-prompt">この略語の意味は？</div>
-    <div class="q-abbr" id="q-abbr">—</div>
+    <div class="q-abbr" id="q-abbr"></div>
     <div class="q-full" id="q-full"></div>
   </div>
-
   <div class="choices" id="choices"></div>
-
   <div class="feedback-box" id="feedback"></div>
-  <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題 →</button>
+  <button class="next-btn" id="next-btn" onclick="nextQ()">次の問題 →</button>
 </div>
 
 <!-- リザルト -->
 <div id="result-screen">
   <div class="result-card">
-    <div class="result-emoji" id="result-emoji">🎉</div>
-    <div class="result-title" id="result-title">ラウンド完了！</div>
-    <div class="result-score" id="result-score">0%</div>
-    <div class="result-sub" id="result-sub">10問中 0問正解</div>
+    <span class="result-mascot" id="r-mascot">🎉</span>
+    <div class="result-title" id="r-title">すごい！</div>
+    <div class="result-pct" id="r-pct">0%</div>
+    <div class="result-sub" id="r-sub">10問中0問正解</div>
     <div class="result-stats">
-      <div class="stat-box stat-correct">
-        <div class="s-num" id="rs-correct">0</div>
-        <div class="s-label">正解</div>
-      </div>
-      <div class="stat-box stat-wrong">
-        <div class="s-num" id="rs-wrong">0</div>
-        <div class="s-label">不正解</div>
-      </div>
+      <div class="stat-box sbox-ok"><div class="s-num" id="r-ok">0</div><div class="s-label">正解</div></div>
+      <div class="stat-box sbox-ng"><div class="s-num" id="r-ng">0</div><div class="s-label">不正解</div></div>
+      <div class="stat-box sbox-combo"><div class="s-num" id="r-combo">0</div><div class="s-label">最大コンボ</div></div>
     </div>
+    <div class="miss-section" id="miss-section"></div>
   </div>
-  <button class="retry-btn" id="retry-btn" onclick="retryQuiz()">同じジャンルでもう一度</button>
-  <button class="back-btn" onclick="goGenreSelect()">ジャンル選択に戻る</button>
+  <button class="retry-btn" onclick="retryQuiz()">もう一度挑戦！ ✨</button>
+  <button class="home-back-btn" onclick="goHome()">🏠 ホームに戻る</button>
 </div>
 
 <script>
-const RAW = [{"genre": "01_business", "genre_ja": "ビジネス", "abbr": "アポ", "full": "アポイントメント", "meaning": "面会・商談などの約束"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "リスケ", "full": "リスケジュール", "meaning": "予定変更"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MTG", "full": "Meeting", "meaning": "会議"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "プレゼン", "full": "プレゼンテーション", "meaning": "発表・提案"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "レジュメ", "full": "résumé / resume", "meaning": "資料・要約・履歴書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "デモ", "full": "デモンストレーション", "meaning": "実演"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "プロモ", "full": "プロモーション", "meaning": "宣伝活動"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ネクアク", "full": "Next Action", "meaning": "次にやること"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ToDo", "full": "To Do", "meaning": "やること"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "リマインド", "full": "reminder", "meaning": "再通知"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "エスカレ", "full": "エスカレーション", "meaning": "上司・上位部署へ相談すること"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "コンプラ", "full": "コンプライアンス", "meaning": "法令遵守"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "レギュ", "full": "レギュレーション", "meaning": "規定・ルール"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "インセン", "full": "インセンティブ", "meaning": "報酬・動機づけ"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "キャパ", "full": "キャパシティ", "meaning": "容量・余力"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "コスパ", "full": "コストパフォーマンス", "meaning": "費用対効果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "タイパ", "full": "タイムパフォーマンス", "meaning": "時間対効果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "オリエン", "full": "オリエンテーション", "meaning": "説明会・導入説明"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "レク", "full": "レクチャー", "meaning": "説明・講義"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "アンケ", "full": "アンケート", "meaning": "調査票"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ブレスト", "full": "ブレインストーミング", "meaning": "アイデア出し"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "オンボ", "full": "オンボーディング", "meaning": "新規参加者の導入"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "オフボ", "full": "オフボーディング", "meaning": "離脱・退職時の手続き"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PJ", "full": "Project", "meaning": "プロジェクト"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PM", "full": "Project Manager / Product Manager", "meaning": "プロジェクト責任者・プロダクト責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PL", "full": "Project Leader", "meaning": "プロジェクトリーダー"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PMO", "full": "Project Management Office", "meaning": "プロジェクト管理支援部門"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "HR", "full": "Human Resources", "meaning": "人事"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PR", "full": "Public Relations", "meaning": "広報"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "IR", "full": "Investor Relations", "meaning": "投資家向け広報"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "R&D", "full": "Research and Development", "meaning": "研究開発"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CEO", "full": "Chief Executive Officer", "meaning": "最高経営責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "COO", "full": "Chief Operating Officer", "meaning": "最高執行責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CFO", "full": "Chief Financial Officer", "meaning": "最高財務責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CTO", "full": "Chief Technology Officer", "meaning": "最高技術責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CMO", "full": "Chief Marketing Officer", "meaning": "最高マーケティング責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CHRO", "full": "Chief Human Resources Officer", "meaning": "最高人事責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "B2B", "full": "Business to Business", "meaning": "企業間取引"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "B2C", "full": "Business to Consumer", "meaning": "企業対消費者取引"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "C2C", "full": "Consumer to Consumer", "meaning": "個人間取引"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "D2C", "full": "Direct to Consumer", "meaning": "メーカー・ブランド直販"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "KPI", "full": "Key Performance Indicator", "meaning": "重要業績評価指標"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "KGI", "full": "Key Goal Indicator", "meaning": "最終目標指標"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "OKR", "full": "Objectives and Key Results", "meaning": "目標と主要成果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PDCA", "full": "Plan, Do, Check, Act", "meaning": "改善サイクル"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "OODA", "full": "Observe, Orient, Decide, Act", "meaning": "意思決定サイクル"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ROI", "full": "Return on Investment", "meaning": "投資対効果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ROE", "full": "Return on Equity", "meaning": "自己資本利益率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ROA", "full": "Return on Assets", "meaning": "総資産利益率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ROAS", "full": "Return on Advertising Spend", "meaning": "広告費用対効果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CPA", "full": "Cost Per Acquisition", "meaning": "顧客獲得単価"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CPC", "full": "Cost Per Click", "meaning": "クリック単価"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CPM", "full": "Cost Per Mille", "meaning": "1000回表示あたり広告費"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CTR", "full": "Click Through Rate", "meaning": "クリック率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CV", "full": "Conversion", "meaning": "成果・成約"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CVR", "full": "Conversion Rate", "meaning": "成約率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "LTV", "full": "Life Time Value", "meaning": "顧客生涯価値"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CAC", "full": "Customer Acquisition Cost", "meaning": "顧客獲得コスト"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CRM", "full": "Customer Relationship Management", "meaning": "顧客関係管理"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SFA", "full": "Sales Force Automation", "meaning": "営業支援システム"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MA", "full": "Marketing Automation", "meaning": "マーケティング自動化"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SEO", "full": "Search Engine Optimization", "meaning": "検索エンジン最適化"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SEM", "full": "Search Engine Marketing", "meaning": "検索エンジンマーケティング"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SNS", "full": "Social Networking Service", "meaning": "ソーシャルメディア"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "LP", "full": "Landing Page", "meaning": "広告・誘導用ページ"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PV", "full": "Page View", "meaning": "ページ閲覧数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "UU", "full": "Unique User", "meaning": "訪問者数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "DAU", "full": "Daily Active Users", "meaning": "1日あたりの利用者数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "WAU", "full": "Weekly Active Users", "meaning": "週あたりの利用者数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MAU", "full": "Monthly Active Users", "meaning": "月あたりの利用者数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MQL", "full": "Marketing Qualified Lead", "meaning": "マーケティング上の有望見込み客"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SQL", "full": "Sales Qualified Lead", "meaning": "営業上の有望見込み客"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "IS", "full": "Inside Sales", "meaning": "内勤営業"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "FS", "full": "Field Sales", "meaning": "外勤営業"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CS", "full": "Customer Success / Customer Support", "meaning": "顧客成功・顧客対応"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CX", "full": "Customer Experience", "meaning": "顧客体験"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "UX", "full": "User Experience", "meaning": "ユーザー体験"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "UI", "full": "User Interface", "meaning": "ユーザー接点・操作画面"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "EX", "full": "Employee Experience", "meaning": "従業員体験"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "DX", "full": "Digital Transformation", "meaning": "デジタル変革"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PoC", "full": "Proof of Concept", "meaning": "概念実証"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MVP", "full": "Minimum Viable Product", "meaning": "必要最小限の製品"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PMF", "full": "Product Market Fit", "meaning": "市場適合"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "GTM", "full": "Go To Market", "meaning": "市場投入戦略"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MRR", "full": "Monthly Recurring Revenue", "meaning": "月次継続収益"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ARR", "full": "Annual Recurring Revenue", "meaning": "年次継続収益"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "GMV", "full": "Gross Merchandise Value", "meaning": "流通取引総額"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MoM", "full": "Month over Month", "meaning": "前月比"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "YoY", "full": "Year over Year", "meaning": "前年比"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "QoQ", "full": "Quarter over Quarter", "meaning": "前四半期比"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "FY", "full": "Fiscal Year", "meaning": "会計年度"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "Q1 / Q2 / Q3 / Q4", "full": "Quarter 1〜4", "meaning": "第1〜第4四半期"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "B/S", "full": "Balance Sheet", "meaning": "貸借対照表"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "P/L", "full": "Profit and Loss Statement", "meaning": "損益計算書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "C/F", "full": "Cash Flow Statement", "meaning": "キャッシュフロー計算書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "AR", "full": "Accounts Receivable", "meaning": "売掛金"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "AP", "full": "Accounts Payable", "meaning": "買掛金"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PO", "full": "Purchase Order", "meaning": "発注書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "RFQ", "full": "Request For Quotation", "meaning": "見積依頼書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "RFP", "full": "Request For Proposal", "meaning": "提案依頼書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "NDA", "full": "Non-Disclosure Agreement", "meaning": "秘密保持契約"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MOU", "full": "Memorandum of Understanding", "meaning": "覚書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "LOI", "full": "Letter of Intent", "meaning": "基本合意書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SLA", "full": "Service Level Agreement", "meaning": "サービス品質保証契約"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "TOS", "full": "Terms of Service", "meaning": "利用規約"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PP", "full": "Privacy Policy", "meaning": "プライバシーポリシー"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "IPO", "full": "Initial Public Offering", "meaning": "新規株式公開"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "M&A", "full": "Mergers and Acquisitions", "meaning": "合併・買収"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "VC", "full": "Venture Capital", "meaning": "ベンチャーキャピタル"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PE", "full": "Private Equity", "meaning": "未公開株投資"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "IRR", "full": "Internal Rate of Return", "meaning": "内部収益率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "NPV", "full": "Net Present Value", "meaning": "正味現在価値"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "EBITDA", "full": "Earnings Before Interest, Taxes, Depreciation and Amortization", "meaning": "利払い・税引き・償却前利益"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "EBIT", "full": "Earnings Before Interest and Taxes", "meaning": "利払い・税引き前利益"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "OPEX", "full": "Operating Expense", "meaning": "事業運営費"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CAPEX", "full": "Capital Expenditure", "meaning": "設備投資"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ESG", "full": "Environmental, Social, Governance", "meaning": "環境・社会・ガバナンス"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SDGs", "full": "Sustainable Development Goals", "meaning": "持続可能な開発目標"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "CC", "full": "Carbon Copy", "meaning": "共有先"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "BCC", "full": "Blind Carbon Copy", "meaning": "相手に見えない共有先"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "Re:", "full": "Reply / Regarding", "meaning": "返信・件名継続"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "Fw: / Fwd:", "full": "Forward", "meaning": "転送"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "FYI", "full": "For Your Information", "meaning": "参考までに"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "FYA", "full": "For Your Action", "meaning": "対応お願いします"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "PFA", "full": "Please Find Attached", "meaning": "添付をご確認ください"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "ASAP", "full": "As Soon As Possible", "meaning": "できるだけ早く"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "EOD", "full": "End of Day", "meaning": "今日中・終業時まで"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "COB", "full": "Close of Business", "meaning": "営業時間終了まで"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "EOW", "full": "End of Week", "meaning": "今週中"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "EOM", "full": "End of Message", "meaning": "件名で本文完結"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "NRN", "full": "No Reply Needed", "meaning": "返信不要"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "RSVP", "full": "Répondez s’il vous plaît", "meaning": "出欠返信お願いします"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "ETA", "full": "Estimated Time of Arrival", "meaning": "到着・完了予定時刻"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "OOO", "full": "Out of Office", "meaning": "不在"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "PTO", "full": "Paid Time Off", "meaning": "有給休暇"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TBD", "full": "To Be Determined", "meaning": "未定"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TBA", "full": "To Be Announced", "meaning": "後日発表"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TBC", "full": "To Be Confirmed", "meaning": "確認中"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "IMO", "full": "In My Opinion", "meaning": "私の意見では"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "IMHO", "full": "In My Humble Opinion", "meaning": "私見ですが"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "BTW", "full": "By The Way", "meaning": "ところで"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TL;DR", "full": "Too Long; Didn’t Read", "meaning": "要約すると"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "LMK", "full": "Let Me Know", "meaning": "教えてください"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "WDYT", "full": "What Do You Think?", "meaning": "どう思いますか"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "POC", "full": "Point of Contact", "meaning": "担当窓口"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TY", "full": "Thank You", "meaning": "ありがとう"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TIA", "full": "Thanks In Advance", "meaning": "先にお礼します"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "BR", "full": "Best Regards", "meaning": "敬具・よろしくお願いします"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "KR", "full": "Kind Regards", "meaning": "よろしくお願いします"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "AFK", "full": "Away From Keyboard", "meaning": "離席中"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "BRB", "full": "Be Right Back", "meaning": "すぐ戻ります"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "DM", "full": "Direct Message", "meaning": "直接メッセージ"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "PM", "full": "Private Message", "meaning": "個別メッセージ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IT", "full": "Information Technology", "meaning": "情報技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "ICT", "full": "Information and Communication Technology", "meaning": "情報通信技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "AI", "full": "Artificial Intelligence", "meaning": "人工知能"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "AGI", "full": "Artificial General Intelligence", "meaning": "汎用人工知能"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "LLM", "full": "Large Language Model", "meaning": "大規模言語モデル"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "ML", "full": "Machine Learning", "meaning": "機械学習"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DL", "full": "Deep Learning", "meaning": "深層学習"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "NLP", "full": "Natural Language Processing", "meaning": "自然言語処理"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "API", "full": "Application Programming Interface", "meaning": "アプリ・システム連携口"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SDK", "full": "Software Development Kit", "meaning": "開発キット"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DB", "full": "Database", "meaning": "データベース"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SQL", "full": "Structured Query Language", "meaning": "データベース操作言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HTML", "full": "HyperText Markup Language", "meaning": "Webページ構造を作る言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CSS", "full": "Cascading Style Sheets", "meaning": "Webページの見た目を作る言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "JS", "full": "JavaScript", "meaning": "プログラミング言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "TS", "full": "TypeScript", "meaning": "JavaScript拡張言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "JSON", "full": "JavaScript Object Notation", "meaning": "データ形式"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "XML", "full": "Extensible Markup Language", "meaning": "データ記述形式"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CSV", "full": "Comma-Separated Values", "meaning": "カンマ区切りデータ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "GUI", "full": "Graphical User Interface", "meaning": "画面操作インターフェース"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CLI", "full": "Command Line Interface", "meaning": "コマンド操作インターフェース"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IDE", "full": "Integrated Development Environment", "meaning": "統合開発環境"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "OS", "full": "Operating System", "meaning": "基本ソフト"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CPU", "full": "Central Processing Unit", "meaning": "中央処理装置"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "GPU", "full": "Graphics Processing Unit", "meaning": "画像処理装置"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "RAM", "full": "Random Access Memory", "meaning": "作業用メモリ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "ROM", "full": "Read Only Memory", "meaning": "読み出し専用メモリ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SSD", "full": "Solid State Drive", "meaning": "記憶装置"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HDD", "full": "Hard Disk Drive", "meaning": "ハードディスク"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "USB", "full": "Universal Serial Bus", "meaning": "接続規格"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "LAN", "full": "Local Area Network", "meaning": "局所ネットワーク"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "WAN", "full": "Wide Area Network", "meaning": "広域ネットワーク"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "Wi-Fi", "full": "Wireless Fidelity", "meaning": "無線通信"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IP", "full": "Internet Protocol", "meaning": "通信規約・識別番号"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "URL", "full": "Uniform Resource Locator", "meaning": "Web上の住所"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "URI", "full": "Uniform Resource Identifier", "meaning": "資源識別子"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HTTP", "full": "HyperText Transfer Protocol", "meaning": "Web通信規約"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HTTPS", "full": "HyperText Transfer Protocol Secure", "meaning": "暗号化Web通信"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "FTP", "full": "File Transfer Protocol", "meaning": "ファイル転送規約"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DNS", "full": "Domain Name System", "meaning": "ドメイン名変換システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SSL", "full": "Secure Sockets Layer", "meaning": "暗号化通信技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "TLS", "full": "Transport Layer Security", "meaning": "暗号化通信技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "VPN", "full": "Virtual Private Network", "meaning": "仮想専用ネットワーク"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CDN", "full": "Content Delivery Network", "meaning": "コンテンツ配信網"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CMS", "full": "Content Management System", "meaning": "コンテンツ管理システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "LMS", "full": "Learning Management System", "meaning": "学習管理システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "ERP", "full": "Enterprise Resource Planning", "meaning": "統合基幹業務システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "WAF", "full": "Web Application Firewall", "meaning": "Webアプリ防御システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "MFA", "full": "Multi-Factor Authentication", "meaning": "多要素認証"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "2FA", "full": "Two-Factor Authentication", "meaning": "二要素認証"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SSO", "full": "Single Sign-On", "meaning": "一括ログイン"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "OAuth", "full": "Open Authorization", "meaning": "認可の仕組み"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "JWT", "full": "JSON Web Token", "meaning": "認証情報トークン"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CRUD", "full": "Create, Read, Update, Delete", "meaning": "作成・読取・更新・削除"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "MVC", "full": "Model View Controller", "meaning": "設計パターン"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SPA", "full": "Single Page Application", "meaning": "単一ページアプリ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SSR", "full": "Server Side Rendering", "meaning": "サーバー側描画"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CSR", "full": "Client Side Rendering", "meaning": "クライアント側描画"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "PWA", "full": "Progressive Web App", "meaning": "Webアプリ技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "OOP", "full": "Object-Oriented Programming", "meaning": "オブジェクト指向プログラミング"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DOM", "full": "Document Object Model", "meaning": "HTML構造を扱う仕組み"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "VM", "full": "Virtual Machine", "meaning": "仮想マシン"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CI", "full": "Continuous Integration", "meaning": "継続的インテグレーション"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CD", "full": "Continuous Delivery / Deployment", "meaning": "継続的デリバリー・デプロイ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DevOps", "full": "Development and Operations", "meaning": "開発と運用の連携"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "QA", "full": "Quality Assurance", "meaning": "品質保証"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "QC", "full": "Quality Control", "meaning": "品質管理"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "UAT", "full": "User Acceptance Test", "meaning": "ユーザー受入テスト"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SRE", "full": "Site Reliability Engineering", "meaning": "サイト信頼性エンジニアリング"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IaC", "full": "Infrastructure as Code", "meaning": "インフラのコード管理"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "K8s", "full": "Kubernetes", "meaning": "コンテナ管理システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HCI", "full": "Human-Computer Interaction", "meaning": "人間とコンピュータの相互作用"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "AR", "full": "Augmented Reality", "meaning": "拡張現実"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "VR", "full": "Virtual Reality", "meaning": "仮想現実"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "MR", "full": "Mixed Reality", "meaning": "複合現実"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "XR", "full": "Extended Reality", "meaning": "拡張現実全般"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IoT", "full": "Internet of Things", "meaning": "モノのインターネット"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "BLE", "full": "Bluetooth Low Energy", "meaning": "省電力Bluetooth"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "NFC", "full": "Near Field Communication", "meaning": "近距離無線通信"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "QR", "full": "Quick Response", "meaning": "QRコード"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "OCR", "full": "Optical Character Recognition", "meaning": "光学文字認識"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "RPA", "full": "Robotic Process Automation", "meaning": "業務自動化"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "就活", "full": "就職活動", "meaning": "就職に向けた活動"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ガクチカ", "full": "学生時代に力を入れたこと", "meaning": "ES・面接で聞かれる経験"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ES", "full": "Entry Sheet", "meaning": "エントリーシート"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "GD", "full": "Group Discussion", "meaning": "グループディスカッション"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "GW", "full": "Group Work", "meaning": "グループワーク"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "SPI", "full": "Synthetic Personality Inventory", "meaning": "適性検査"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "Webテ", "full": "Webテスト", "meaning": "オンライン適性検査"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "インターン", "full": "インターンシップ", "meaning": "就業体験"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "サマイン", "full": "サマーインターン", "meaning": "夏のインターン"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "OB", "full": "Old Boy", "meaning": "男性卒業生"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "OG", "full": "Old Girl", "meaning": "女性卒業生"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "OB訪問", "full": "Old Boy訪問", "meaning": "卒業生訪問"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "OG訪問", "full": "Old Girl訪問", "meaning": "卒業生訪問"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "NNT", "full": "無い内定", "meaning": "内定がない状態"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "GPA", "full": "Grade Point Average", "meaning": "成績平均値"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "AO", "full": "Admissions Office", "meaning": "総合型・AO入試"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ICU", "full": "International Christian University", "meaning": "国際基督教大学"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ELA", "full": "English for Liberal Arts", "meaning": "ICUの英語教育プログラム"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "レポ", "full": "レポート", "meaning": "課題文章"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "プレゼン", "full": "プレゼンテーション", "meaning": "発表"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "リアペ", "full": "リアクションペーパー", "meaning": "授業コメント・小課題"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "シラバス", "full": "syllabus", "meaning": "授業計画"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "履修", "full": "履修登録", "meaning": "授業を取ること"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "落単", "full": "単位を落とす", "meaning": "単位を取れないこと"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "フル単", "full": "フル単位取得", "meaning": "履修した単位を全部取ること"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "必修", "full": "必ず履修する科目", "meaning": "必須科目"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "選必", "full": "選択必修", "meaning": "複数から選ぶ必修科目"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ゼミ", "full": "ゼミナール", "meaning": "少人数演習"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "卒論", "full": "卒業論文", "meaning": "卒業時の論文"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "修論", "full": "修士論文", "meaning": "修士課程の論文"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "博論", "full": "博士論文", "meaning": "博士課程の論文"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "りょ", "full": "了解", "meaning": "わかった"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おけ", "full": "OK", "meaning": "わかった"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "よろ", "full": "よろしく", "meaning": "よろしく"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おつ", "full": "お疲れ", "meaning": "お疲れ様"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "乙", "full": "お疲れ", "meaning": "お疲れ様"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "あざす", "full": "ありがとうございます", "meaning": "ありがとう"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "すまん", "full": "すみません", "meaning": "ごめん"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ごめ", "full": "ごめん", "meaning": "ごめん"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "まじ", "full": "真面目に / 本当に", "meaning": "本当に"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ガチ", "full": "ガチンコ", "meaning": "本気・本当"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "めちゃ", "full": "めちゃくちゃ", "meaning": "とても"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "めっちゃ", "full": "めちゃくちゃ", "meaning": "とても"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "とりま", "full": "とりあえず、まあ", "meaning": "ひとまず"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ちな", "full": "ちなみに", "meaning": "補足すると"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "てか", "full": "というか", "meaning": "話を変える・補足する"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "なんなら", "full": "何なら", "meaning": "むしろ"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "だる", "full": "だるい", "meaning": "面倒・しんどい"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "めんど", "full": "面倒くさい", "meaning": "面倒"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "きまず", "full": "気まずい", "meaning": "気まずい"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "えぐ", "full": "えぐい", "meaning": "すごい・ひどい"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "きしょ", "full": "気色悪い", "meaning": "気持ち悪い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "かわ", "full": "可愛い", "meaning": "可愛い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "かっこよ", "full": "かっこいい", "meaning": "かっこいい"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おもろ", "full": "面白い", "meaning": "面白い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ねむ", "full": "眠い", "meaning": "眠い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "さむ", "full": "寒い", "meaning": "寒い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "あつ", "full": "暑い", "meaning": "暑い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ひま", "full": "暇", "meaning": "暇"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おは", "full": "おはよう", "meaning": "朝の挨拶"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "こん", "full": "こんにちは / こんばんは", "meaning": "挨拶"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ばんわ", "full": "こんばんは", "meaning": "夜の挨拶"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おか", "full": "おかえり", "meaning": "帰宅時の挨拶"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ドタキャン", "full": "土壇場キャンセル", "meaning": "直前キャンセル"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ブッチ", "full": "ぶっちぎる", "meaning": "約束を無視する"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "即レス", "full": "即レスポンス", "meaning": "すぐ返信"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "遅レス", "full": "遅いレスポンス", "meaning": "遅い返信"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "レス", "full": "レスポンス", "meaning": "返信"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "リプ", "full": "リプライ", "meaning": "返信"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ビデ通", "full": "ビデオ通話", "meaning": "映像付き通話"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "カラオケ", "full": "空オーケストラ", "meaning": "歌唱施設・歌うこと"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "オール", "full": "オールナイト", "meaning": "徹夜"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "チケ", "full": "チケット", "meaning": "入場券"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "グッズ", "full": "Goods", "meaning": "商品"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "フェス", "full": "フェスティバル", "meaning": "音楽・文化イベント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ライブ", "full": "Live performance", "meaning": "生演奏・公演"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "インスタ", "full": "Instagram", "meaning": "SNS"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ツイ", "full": "Twitter / X", "meaning": "投稿・SNS"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "リポスト", "full": "Repost", "meaning": "再投稿"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "フォロバ", "full": "フォローバック", "meaning": "フォロー返し"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "鍵垢", "full": "鍵付きアカウント", "meaning": "非公開アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "裏垢", "full": "裏アカウント", "meaning": "別の匿名アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "サブ垢", "full": "サブアカウント", "meaning": "予備アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "本垢", "full": "本アカウント", "meaning": "メインアカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "捨て垢", "full": "捨てアカウント", "meaning": "一時的アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "リア垢", "full": "リアル用アカウント", "meaning": "現実の友人向けアカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "オタ垢", "full": "オタク活動用アカウント", "meaning": "趣味用アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "スマホ", "full": "スマートフォン", "meaning": "携帯端末"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "パソコン", "full": "パーソナルコンピューター", "meaning": "PC"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "リモコン", "full": "リモートコントローラー", "meaning": "遠隔操作機器"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "エアコン", "full": "エアコンディショナー", "meaning": "空調機"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "アプリ", "full": "アプリケーション", "meaning": "ソフトウェア"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "メアド", "full": "メールアドレス", "meaning": "メールの宛先"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "プロフ", "full": "プロフィール", "meaning": "自己紹介"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "サムネ", "full": "サムネイル", "meaning": "小さな見本画像"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "スクショ", "full": "スクリーンショット", "meaning": "画面保存"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "コピペ", "full": "コピー・アンド・ペースト", "meaning": "複製して貼り付け"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "アプデ", "full": "アップデート", "meaning": "更新"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "インスト", "full": "インストール", "meaning": "導入"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "アンスト", "full": "アンインストール", "meaning": "削除"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "モバ充", "full": "モバイル充電器", "meaning": "モバイルバッテリー"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "コンビニ", "full": "コンビニエンスストア", "meaning": "便利店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "スーパー", "full": "スーパーマーケット", "meaning": "食料品店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "デパート", "full": "デパートメントストア", "meaning": "百貨店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ファミレス", "full": "ファミリーレストラン", "meaning": "家族向け飲食店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ファストフード", "full": "ファストフードレストラン", "meaning": "短時間提供の飲食店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "スタバ", "full": "スターバックス", "meaning": "カフェチェーン"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ミスド", "full": "ミスタードーナツ", "meaning": "ドーナツ店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "サイゼ", "full": "サイゼリヤ", "meaning": "ファミレス"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ドンキ", "full": "ドン・キホーテ", "meaning": "ディスカウント店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ユニバ", "full": "ユニバーサル・スタジオ・ジャパン", "meaning": "テーマパーク"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "クレカ", "full": "クレジットカード", "meaning": "後払いカード"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "デビカ", "full": "デビットカード", "meaning": "即時引き落としカード"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "電マネ", "full": "電子マネー", "meaning": "電子的決済手段"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ポイ活", "full": "ポイント活動", "meaning": "ポイントを貯める活動"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "サブスク", "full": "サブスクリプション", "meaning": "定額制サービス"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "アマプラ", "full": "Amazon Prime", "meaning": "Amazonの有料会員サービス"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ネトフリ", "full": "Netflix", "meaning": "動画配信サービス"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ググる", "full": "Googleで検索する", "meaning": "検索する"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "飲み放", "full": "飲み放題", "meaning": "定額で飲める形式"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "食べ放", "full": "食べ放題", "meaning": "定額で食べられる形式"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "テイク", "full": "テイクアウト", "meaning": "持ち帰り"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ウーバー", "full": "Uber Eats", "meaning": "フードデリバリー"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "代引", "full": "代金引換", "meaning": "商品受取時に支払うこと"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "学割", "full": "学生割引", "meaning": "学生向け割引"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "終電", "full": "最終電車", "meaning": "その日の最後の電車"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "始発", "full": "始発電車", "meaning": "その日の最初の電車"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "高速", "full": "高速道路", "meaning": "高速で走れる道路"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "下道", "full": "一般道", "meaning": "高速道路以外の道"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "定期", "full": "定期券", "meaning": "一定期間の乗車券"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "新幹線", "full": "新幹線鉄道", "meaning": "高速鉄道"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "地下鉄", "full": "地下鉄道", "meaning": "地下を走る鉄道"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "SNS", "full": "Social Networking Service", "meaning": "ソーシャルメディア"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IG", "full": "Instagram", "meaning": "インスタ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "YT", "full": "YouTube", "meaning": "YouTube"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FB", "full": "Facebook", "meaning": "Facebook"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "DM", "full": "Direct Message", "meaning": "個別メッセージ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "PM", "full": "Private Message", "meaning": "個別メッセージ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "TL", "full": "Timeline", "meaning": "タイムライン"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "RT", "full": "ReTweet", "meaning": "再投稿"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "RP", "full": "Repost", "meaning": "再投稿"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "QT", "full": "Quote Tweet", "meaning": "引用投稿"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FF", "full": "Following / Followers", "meaning": "フォロー・フォロワー関係"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FF外", "full": "フォロー・フォロワー外", "meaning": "相互関係にない人"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "ROM", "full": "Read Only Member", "meaning": "見るだけの人"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "LOL", "full": "Laughing Out Loud", "meaning": "笑い"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "LMAO", "full": "Laughing My Ass Off", "meaning": "大笑い"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "ROFL", "full": "Rolling On the Floor Laughing", "meaning": "転げ回るほど笑う"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "OMG", "full": "Oh My God", "meaning": "驚き"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "WTF", "full": "What The Fuck", "meaning": "驚き・怒り"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IDK", "full": "I Don’t Know", "meaning": "わからない"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IDC", "full": "I Don’t Care", "meaning": "気にしない"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IKR", "full": "I Know, Right?", "meaning": "それな"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "TBH", "full": "To Be Honest", "meaning": "正直言うと"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "NGL", "full": "Not Gonna Lie", "meaning": "正直言うと"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "BTW", "full": "By The Way", "meaning": "ところで"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FYI", "full": "For Your Information", "meaning": "参考までに"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FOMO", "full": "Fear Of Missing Out", "meaning": "取り残される不安"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "YOLO", "full": "You Only Live Once", "meaning": "人生一度きり"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IRL", "full": "In Real Life", "meaning": "現実世界で"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "AFK", "full": "Away From Keyboard", "meaning": "離席中"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "BRB", "full": "Be Right Back", "meaning": "すぐ戻る"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "GTG", "full": "Got To Go", "meaning": "行かなきゃ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "TTYL", "full": "Talk To You Later", "meaning": "また後で"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "Plz / pls", "full": "Please", "meaning": "お願い"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "Thx / tx", "full": "Thanks", "meaning": "ありがとう"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "TY", "full": "Thank You", "meaning": "ありがとう"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "np", "full": "No Problem", "meaning": "問題ない"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "smh", "full": "Shaking My Head", "meaning": "あきれた"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "bff", "full": "Best Friends Forever", "meaning": "親友"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "POV", "full": "Point of View", "meaning": "視点・一人称視点"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "GRWM", "full": "Get Ready With Me", "meaning": "準備動画"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "OOTD", "full": "Outfit Of The Day", "meaning": "今日の服装"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FYP", "full": "For You Page", "meaning": "TikTokなどのおすすめ欄"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "ASMR", "full": "Autonomous Sensory Meridian Response", "meaning": "音・感覚系コンテンツ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FAQ", "full": "Frequently Asked Questions", "meaning": "よくある質問"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "AMA", "full": "Ask Me Anything", "meaning": "何でも質問して"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "マイナ", "full": "マイナンバー", "meaning": "個人番号"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "マイナカード", "full": "マイナンバーカード", "meaning": "個人番号カード"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "保険証", "full": "健康保険証", "meaning": "医療保険の証明"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "免許証", "full": "運転免許証", "meaning": "運転資格証明"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "学生証", "full": "学生身分証", "meaning": "学生である証明"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "診察券", "full": "診察カード", "meaning": "病院の患者カード"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "処方箋", "full": "処方せん", "meaning": "薬の指示書"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "OTC", "full": "Over The Counter", "meaning": "市販薬"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "ICU", "full": "Intensive Care Unit", "meaning": "集中治療室"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "ER", "full": "Emergency Room", "meaning": "救急外来"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "MRI", "full": "Magnetic Resonance Imaging", "meaning": "磁気共鳴画像"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "CT", "full": "Computed Tomography", "meaning": "コンピュータ断層撮影"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "PCR", "full": "Polymerase Chain Reaction", "meaning": "遺伝子増幅検査"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "リハビリ", "full": "Rehabilitation", "meaning": "機能回復訓練"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "インフル", "full": "インフルエンザ", "meaning": "感染症"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "コロナ", "full": "コロナウイルス感染症", "meaning": "感染症"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "アレルギー", "full": "allergy", "meaning": "免疫反応"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "メンタル", "full": "mental health", "meaning": "精神面"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "皮膚科", "full": "皮膚科学科", "meaning": "皮膚の診療科"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "耳鼻科", "full": "耳鼻咽喉科", "meaning": "耳・鼻・喉の診療科"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "整形", "full": "整形外科 / 美容整形", "meaning": "骨・関節、または美容手術"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "自賠責", "full": "自動車損害賠償責任保険", "meaning": "自動車の強制保険"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "国保", "full": "国民健康保険", "meaning": "自営業者などの健康保険"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "社保", "full": "社会保険", "meaning": "会社員などの保険"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "源泉", "full": "源泉徴収", "meaning": "給与から税を引く仕組み"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "確申", "full": "確定申告", "meaning": "所得税などの申告"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "住民税", "full": "住民に課される税", "meaning": "地方税"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "所得税", "full": "所得にかかる税", "meaning": "国税"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "e-Tax", "full": "Electronic Tax", "meaning": "電子申告システム"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "JR", "full": "Japan Railways", "meaning": "JR各社"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "IC", "full": "Integrated Circuit", "meaning": "ICカード・インターチェンジ"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ETC", "full": "Electronic Toll Collection", "meaning": "自動料金収受システム"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "SA", "full": "Service Area", "meaning": "サービスエリア"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "PA", "full": "Parking Area", "meaning": "パーキングエリア"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "JCT", "full": "Junction", "meaning": "道路の分岐点"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "LCC", "full": "Low Cost Carrier", "meaning": "格安航空会社"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "FSC", "full": "Full Service Carrier", "meaning": "フルサービス航空会社"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ANA", "full": "All Nippon Airways", "meaning": "全日本空輸"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "JAL", "full": "Japan Airlines", "meaning": "日本航空"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ETA", "full": "Estimated Time of Arrival", "meaning": "到着予定時刻"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ETD", "full": "Estimated Time of Departure", "meaning": "出発予定時刻"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "STA", "full": "Scheduled Time of Arrival", "meaning": "定刻到着時刻"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "STD", "full": "Scheduled Time of Departure", "meaning": "定刻出発時刻"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ESTA", "full": "Electronic System for Travel Authorization", "meaning": "米国電子渡航認証"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "eTA", "full": "Electronic Travel Authorization", "meaning": "電子渡航認証"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "リハ", "full": "リハーサル", "meaning": "練習"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ゲネ", "full": "ゲネプロ / Generalprobe", "meaning": "本番同様の通し稽古"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "オーデ", "full": "オーディション", "meaning": "審査"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ロケ", "full": "ロケーション撮影", "meaning": "屋外・現地撮影"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ロケハン", "full": "ロケーション・ハンティング", "meaning": "撮影場所探し"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ナレ", "full": "ナレーション", "meaning": "語り"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "アフレコ", "full": "アフター・レコーディング", "meaning": "後から声を録ること"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "アテレコ", "full": "当てレコーディング", "meaning": "映像に声を当てること"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "バミリ", "full": "場見る / 場所を見る目印", "meaning": "立ち位置の印"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MA", "full": "Multi Audio", "meaning": "音声仕上げ"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "BGM", "full": "Background Music", "meaning": "背景音楽"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "SE", "full": "Sound Effect", "meaning": "効果音"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "SFX", "full": "Special Effects", "meaning": "特殊効果"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "VFX", "full": "Visual Effects", "meaning": "視覚効果"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "CG", "full": "Computer Graphics", "meaning": "コンピュータグラフィックス"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "CGI", "full": "Computer Generated Imagery", "meaning": "コンピュータ生成映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "LUT", "full": "Look Up Table", "meaning": "色変換データ"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "RAW", "full": "Raw data", "meaning": "未加工データ"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "JPEG", "full": "Joint Photographic Experts Group", "meaning": "画像形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "PNG", "full": "Portable Network Graphics", "meaning": "画像形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MP4", "full": "MPEG-4 Part 14", "meaning": "動画形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MOV", "full": "QuickTime Movie", "meaning": "動画形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "WAV", "full": "Waveform Audio File Format", "meaning": "音声形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MP3", "full": "MPEG Audio Layer-3", "meaning": "音声形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "fps", "full": "frames per second", "meaning": "1秒あたりのフレーム数"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "4K", "full": "4000前後の横画素数", "meaning": "高解像度映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "HD", "full": "High Definition", "meaning": "高精細映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "FHD", "full": "Full High Definition", "meaning": "フルHD"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "SD", "full": "Standard Definition", "meaning": "標準画質"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MV", "full": "Music Video", "meaning": "音楽映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "PV", "full": "Promotion Video", "meaning": "宣伝映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "CM", "full": "Commercial Message", "meaning": "広告映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "OP", "full": "Opening", "meaning": "冒頭映像・曲"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ED", "full": "Ending", "meaning": "終了映像・曲"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "B-roll", "full": "補助映像", "meaning": "メイン映像を補う素材"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "サムネ", "full": "サムネイル", "meaning": "見本画像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "テロップ", "full": "television opaque projector由来", "meaning": "画面上の文字"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "完パケ", "full": "完全パッケージ", "meaning": "完成済み納品物"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "初稿", "full": "最初の原稿", "meaning": "最初の案"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "再稿", "full": "再提出原稿", "meaning": "修正版"}]
+const RAW=[{"genre": "01_business", "genre_ja": "ビジネス", "abbr": "アポ", "full": "アポイントメント", "meaning": "面会・商談などの約束"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "リスケ", "full": "リスケジュール", "meaning": "予定変更"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MTG", "full": "Meeting", "meaning": "会議"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "プレゼン", "full": "プレゼンテーション", "meaning": "発表・提案"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "レジュメ", "full": "résumé / resume", "meaning": "資料・要約・履歴書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "デモ", "full": "デモンストレーション", "meaning": "実演"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "プロモ", "full": "プロモーション", "meaning": "宣伝活動"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ネクアク", "full": "Next Action", "meaning": "次にやること"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ToDo", "full": "To Do", "meaning": "やること"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "リマインド", "full": "reminder", "meaning": "再通知"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "エスカレ", "full": "エスカレーション", "meaning": "上司・上位部署へ相談すること"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "コンプラ", "full": "コンプライアンス", "meaning": "法令遵守"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "レギュ", "full": "レギュレーション", "meaning": "規定・ルール"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "インセン", "full": "インセンティブ", "meaning": "報酬・動機づけ"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "キャパ", "full": "キャパシティ", "meaning": "容量・余力"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "コスパ", "full": "コストパフォーマンス", "meaning": "費用対効果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "タイパ", "full": "タイムパフォーマンス", "meaning": "時間対効果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "オリエン", "full": "オリエンテーション", "meaning": "説明会・導入説明"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "レク", "full": "レクチャー", "meaning": "説明・講義"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "アンケ", "full": "アンケート", "meaning": "調査票"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ブレスト", "full": "ブレインストーミング", "meaning": "アイデア出し"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "オンボ", "full": "オンボーディング", "meaning": "新規参加者の導入"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "オフボ", "full": "オフボーディング", "meaning": "離脱・退職時の手続き"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PJ", "full": "Project", "meaning": "プロジェクト"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PM", "full": "Project Manager / Product Manager", "meaning": "プロジェクト責任者・プロダクト責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PL", "full": "Project Leader", "meaning": "プロジェクトリーダー"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PMO", "full": "Project Management Office", "meaning": "プロジェクト管理支援部門"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "HR", "full": "Human Resources", "meaning": "人事"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PR", "full": "Public Relations", "meaning": "広報"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "IR", "full": "Investor Relations", "meaning": "投資家向け広報"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "R&D", "full": "Research and Development", "meaning": "研究開発"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CEO", "full": "Chief Executive Officer", "meaning": "最高経営責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "COO", "full": "Chief Operating Officer", "meaning": "最高執行責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CFO", "full": "Chief Financial Officer", "meaning": "最高財務責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CTO", "full": "Chief Technology Officer", "meaning": "最高技術責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CMO", "full": "Chief Marketing Officer", "meaning": "最高マーケティング責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CHRO", "full": "Chief Human Resources Officer", "meaning": "最高人事責任者"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "B2B", "full": "Business to Business", "meaning": "企業間取引"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "B2C", "full": "Business to Consumer", "meaning": "企業対消費者取引"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "C2C", "full": "Consumer to Consumer", "meaning": "個人間取引"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "D2C", "full": "Direct to Consumer", "meaning": "メーカー・ブランド直販"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "KPI", "full": "Key Performance Indicator", "meaning": "重要業績評価指標"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "KGI", "full": "Key Goal Indicator", "meaning": "最終目標指標"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "OKR", "full": "Objectives and Key Results", "meaning": "目標と主要成果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PDCA", "full": "Plan, Do, Check, Act", "meaning": "改善サイクル"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "OODA", "full": "Observe, Orient, Decide, Act", "meaning": "意思決定サイクル"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ROI", "full": "Return on Investment", "meaning": "投資対効果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ROE", "full": "Return on Equity", "meaning": "自己資本利益率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ROA", "full": "Return on Assets", "meaning": "総資産利益率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ROAS", "full": "Return on Advertising Spend", "meaning": "広告費用対効果"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CPA", "full": "Cost Per Acquisition", "meaning": "顧客獲得単価"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CPC", "full": "Cost Per Click", "meaning": "クリック単価"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CPM", "full": "Cost Per Mille", "meaning": "1000回表示あたり広告費"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CTR", "full": "Click Through Rate", "meaning": "クリック率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CV", "full": "Conversion", "meaning": "成果・成約"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CVR", "full": "Conversion Rate", "meaning": "成約率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "LTV", "full": "Life Time Value", "meaning": "顧客生涯価値"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CAC", "full": "Customer Acquisition Cost", "meaning": "顧客獲得コスト"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CRM", "full": "Customer Relationship Management", "meaning": "顧客関係管理"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SFA", "full": "Sales Force Automation", "meaning": "営業支援システム"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MA", "full": "Marketing Automation", "meaning": "マーケティング自動化"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SEO", "full": "Search Engine Optimization", "meaning": "検索エンジン最適化"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SEM", "full": "Search Engine Marketing", "meaning": "検索エンジンマーケティング"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SNS", "full": "Social Networking Service", "meaning": "ソーシャルメディア"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "LP", "full": "Landing Page", "meaning": "広告・誘導用ページ"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PV", "full": "Page View", "meaning": "ページ閲覧数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "UU", "full": "Unique User", "meaning": "訪問者数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "DAU", "full": "Daily Active Users", "meaning": "1日あたりの利用者数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "WAU", "full": "Weekly Active Users", "meaning": "週あたりの利用者数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MAU", "full": "Monthly Active Users", "meaning": "月あたりの利用者数"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MQL", "full": "Marketing Qualified Lead", "meaning": "マーケティング上の有望見込み客"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SQL", "full": "Sales Qualified Lead", "meaning": "営業上の有望見込み客"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "IS", "full": "Inside Sales", "meaning": "内勤営業"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "FS", "full": "Field Sales", "meaning": "外勤営業"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CS", "full": "Customer Success / Customer Support", "meaning": "顧客成功・顧客対応"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CX", "full": "Customer Experience", "meaning": "顧客体験"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "UX", "full": "User Experience", "meaning": "ユーザー体験"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "UI", "full": "User Interface", "meaning": "ユーザー接点・操作画面"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "EX", "full": "Employee Experience", "meaning": "従業員体験"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "DX", "full": "Digital Transformation", "meaning": "デジタル変革"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PoC", "full": "Proof of Concept", "meaning": "概念実証"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MVP", "full": "Minimum Viable Product", "meaning": "必要最小限の製品"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PMF", "full": "Product Market Fit", "meaning": "市場適合"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "GTM", "full": "Go To Market", "meaning": "市場投入戦略"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MRR", "full": "Monthly Recurring Revenue", "meaning": "月次継続収益"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ARR", "full": "Annual Recurring Revenue", "meaning": "年次継続収益"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "GMV", "full": "Gross Merchandise Value", "meaning": "流通取引総額"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MoM", "full": "Month over Month", "meaning": "前月比"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "YoY", "full": "Year over Year", "meaning": "前年比"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "QoQ", "full": "Quarter over Quarter", "meaning": "前四半期比"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "FY", "full": "Fiscal Year", "meaning": "会計年度"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "Q1 / Q2 / Q3 / Q4", "full": "Quarter 1〜4", "meaning": "第1〜第4四半期"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "B/S", "full": "Balance Sheet", "meaning": "貸借対照表"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "P/L", "full": "Profit and Loss Statement", "meaning": "損益計算書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "C/F", "full": "Cash Flow Statement", "meaning": "キャッシュフロー計算書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "AR", "full": "Accounts Receivable", "meaning": "売掛金"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "AP", "full": "Accounts Payable", "meaning": "買掛金"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PO", "full": "Purchase Order", "meaning": "発注書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "RFQ", "full": "Request For Quotation", "meaning": "見積依頼書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "RFP", "full": "Request For Proposal", "meaning": "提案依頼書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "NDA", "full": "Non-Disclosure Agreement", "meaning": "秘密保持契約"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "MOU", "full": "Memorandum of Understanding", "meaning": "覚書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "LOI", "full": "Letter of Intent", "meaning": "基本合意書"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SLA", "full": "Service Level Agreement", "meaning": "サービス品質保証契約"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "TOS", "full": "Terms of Service", "meaning": "利用規約"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PP", "full": "Privacy Policy", "meaning": "プライバシーポリシー"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "IPO", "full": "Initial Public Offering", "meaning": "新規株式公開"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "M&A", "full": "Mergers and Acquisitions", "meaning": "合併・買収"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "VC", "full": "Venture Capital", "meaning": "ベンチャーキャピタル"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "PE", "full": "Private Equity", "meaning": "未公開株投資"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "IRR", "full": "Internal Rate of Return", "meaning": "内部収益率"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "NPV", "full": "Net Present Value", "meaning": "正味現在価値"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "EBITDA", "full": "Earnings Before Interest, Taxes, Depreciation and Amortization", "meaning": "利払い・税引き・償却前利益"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "EBIT", "full": "Earnings Before Interest and Taxes", "meaning": "利払い・税引き前利益"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "OPEX", "full": "Operating Expense", "meaning": "事業運営費"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "CAPEX", "full": "Capital Expenditure", "meaning": "設備投資"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "ESG", "full": "Environmental, Social, Governance", "meaning": "環境・社会・ガバナンス"}, {"genre": "01_business", "genre_ja": "ビジネス", "abbr": "SDGs", "full": "Sustainable Development Goals", "meaning": "持続可能な開発目標"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "CC", "full": "Carbon Copy", "meaning": "共有先"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "BCC", "full": "Blind Carbon Copy", "meaning": "相手に見えない共有先"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "Re:", "full": "Reply / Regarding", "meaning": "返信・件名継続"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "Fw: / Fwd:", "full": "Forward", "meaning": "転送"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "FYI", "full": "For Your Information", "meaning": "参考までに"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "FYA", "full": "For Your Action", "meaning": "対応お願いします"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "PFA", "full": "Please Find Attached", "meaning": "添付をご確認ください"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "ASAP", "full": "As Soon As Possible", "meaning": "できるだけ早く"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "EOD", "full": "End of Day", "meaning": "今日中・終業時まで"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "COB", "full": "Close of Business", "meaning": "営業時間終了まで"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "EOW", "full": "End of Week", "meaning": "今週中"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "EOM", "full": "End of Message", "meaning": "件名で本文完結"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "NRN", "full": "No Reply Needed", "meaning": "返信不要"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "RSVP", "full": "Répondez s’il vous plaît", "meaning": "出欠返信お願いします"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "ETA", "full": "Estimated Time of Arrival", "meaning": "到着・完了予定時刻"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "OOO", "full": "Out of Office", "meaning": "不在"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "PTO", "full": "Paid Time Off", "meaning": "有給休暇"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TBD", "full": "To Be Determined", "meaning": "未定"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TBA", "full": "To Be Announced", "meaning": "後日発表"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TBC", "full": "To Be Confirmed", "meaning": "確認中"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "IMO", "full": "In My Opinion", "meaning": "私の意見では"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "IMHO", "full": "In My Humble Opinion", "meaning": "私見ですが"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "BTW", "full": "By The Way", "meaning": "ところで"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TL;DR", "full": "Too Long; Didn’t Read", "meaning": "要約すると"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "LMK", "full": "Let Me Know", "meaning": "教えてください"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "WDYT", "full": "What Do You Think?", "meaning": "どう思いますか"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "POC", "full": "Point of Contact", "meaning": "担当窓口"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TY", "full": "Thank You", "meaning": "ありがとう"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "TIA", "full": "Thanks In Advance", "meaning": "先にお礼します"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "BR", "full": "Best Regards", "meaning": "敬具・よろしくお願いします"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "KR", "full": "Kind Regards", "meaning": "よろしくお願いします"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "AFK", "full": "Away From Keyboard", "meaning": "離席中"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "BRB", "full": "Be Right Back", "meaning": "すぐ戻ります"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "DM", "full": "Direct Message", "meaning": "直接メッセージ"}, {"genre": "02_email_chat", "genre_ja": "メール・チャット", "abbr": "PM", "full": "Private Message", "meaning": "個別メッセージ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IT", "full": "Information Technology", "meaning": "情報技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "ICT", "full": "Information and Communication Technology", "meaning": "情報通信技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "AI", "full": "Artificial Intelligence", "meaning": "人工知能"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "AGI", "full": "Artificial General Intelligence", "meaning": "汎用人工知能"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "LLM", "full": "Large Language Model", "meaning": "大規模言語モデル"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "ML", "full": "Machine Learning", "meaning": "機械学習"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DL", "full": "Deep Learning", "meaning": "深層学習"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "NLP", "full": "Natural Language Processing", "meaning": "自然言語処理"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "API", "full": "Application Programming Interface", "meaning": "アプリ・システム連携口"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SDK", "full": "Software Development Kit", "meaning": "開発キット"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DB", "full": "Database", "meaning": "データベース"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SQL", "full": "Structured Query Language", "meaning": "データベース操作言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HTML", "full": "HyperText Markup Language", "meaning": "Webページ構造を作る言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CSS", "full": "Cascading Style Sheets", "meaning": "Webページの見た目を作る言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "JS", "full": "JavaScript", "meaning": "プログラミング言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "TS", "full": "TypeScript", "meaning": "JavaScript拡張言語"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "JSON", "full": "JavaScript Object Notation", "meaning": "データ形式"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "XML", "full": "Extensible Markup Language", "meaning": "データ記述形式"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CSV", "full": "Comma-Separated Values", "meaning": "カンマ区切りデータ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "GUI", "full": "Graphical User Interface", "meaning": "画面操作インターフェース"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CLI", "full": "Command Line Interface", "meaning": "コマンド操作インターフェース"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IDE", "full": "Integrated Development Environment", "meaning": "統合開発環境"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "OS", "full": "Operating System", "meaning": "基本ソフト"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CPU", "full": "Central Processing Unit", "meaning": "中央処理装置"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "GPU", "full": "Graphics Processing Unit", "meaning": "画像処理装置"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "RAM", "full": "Random Access Memory", "meaning": "作業用メモリ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "ROM", "full": "Read Only Memory", "meaning": "読み出し専用メモリ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SSD", "full": "Solid State Drive", "meaning": "記憶装置"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HDD", "full": "Hard Disk Drive", "meaning": "ハードディスク"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "USB", "full": "Universal Serial Bus", "meaning": "接続規格"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "LAN", "full": "Local Area Network", "meaning": "局所ネットワーク"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "WAN", "full": "Wide Area Network", "meaning": "広域ネットワーク"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "Wi-Fi", "full": "Wireless Fidelity", "meaning": "無線通信"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IP", "full": "Internet Protocol", "meaning": "通信規約・識別番号"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "URL", "full": "Uniform Resource Locator", "meaning": "Web上の住所"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "URI", "full": "Uniform Resource Identifier", "meaning": "資源識別子"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HTTP", "full": "HyperText Transfer Protocol", "meaning": "Web通信規約"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HTTPS", "full": "HyperText Transfer Protocol Secure", "meaning": "暗号化Web通信"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "FTP", "full": "File Transfer Protocol", "meaning": "ファイル転送規約"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DNS", "full": "Domain Name System", "meaning": "ドメイン名変換システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SSL", "full": "Secure Sockets Layer", "meaning": "暗号化通信技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "TLS", "full": "Transport Layer Security", "meaning": "暗号化通信技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "VPN", "full": "Virtual Private Network", "meaning": "仮想専用ネットワーク"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CDN", "full": "Content Delivery Network", "meaning": "コンテンツ配信網"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CMS", "full": "Content Management System", "meaning": "コンテンツ管理システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "LMS", "full": "Learning Management System", "meaning": "学習管理システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "ERP", "full": "Enterprise Resource Planning", "meaning": "統合基幹業務システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "WAF", "full": "Web Application Firewall", "meaning": "Webアプリ防御システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "MFA", "full": "Multi-Factor Authentication", "meaning": "多要素認証"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "2FA", "full": "Two-Factor Authentication", "meaning": "二要素認証"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SSO", "full": "Single Sign-On", "meaning": "一括ログイン"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "OAuth", "full": "Open Authorization", "meaning": "認可の仕組み"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "JWT", "full": "JSON Web Token", "meaning": "認証情報トークン"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CRUD", "full": "Create, Read, Update, Delete", "meaning": "作成・読取・更新・削除"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "MVC", "full": "Model View Controller", "meaning": "設計パターン"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SPA", "full": "Single Page Application", "meaning": "単一ページアプリ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SSR", "full": "Server Side Rendering", "meaning": "サーバー側描画"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CSR", "full": "Client Side Rendering", "meaning": "クライアント側描画"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "PWA", "full": "Progressive Web App", "meaning": "Webアプリ技術"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "OOP", "full": "Object-Oriented Programming", "meaning": "オブジェクト指向プログラミング"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DOM", "full": "Document Object Model", "meaning": "HTML構造を扱う仕組み"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "VM", "full": "Virtual Machine", "meaning": "仮想マシン"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CI", "full": "Continuous Integration", "meaning": "継続的インテグレーション"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "CD", "full": "Continuous Delivery / Deployment", "meaning": "継続的デリバリー・デプロイ"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "DevOps", "full": "Development and Operations", "meaning": "開発と運用の連携"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "QA", "full": "Quality Assurance", "meaning": "品質保証"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "QC", "full": "Quality Control", "meaning": "品質管理"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "UAT", "full": "User Acceptance Test", "meaning": "ユーザー受入テスト"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "SRE", "full": "Site Reliability Engineering", "meaning": "サイト信頼性エンジニアリング"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IaC", "full": "Infrastructure as Code", "meaning": "インフラのコード管理"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "K8s", "full": "Kubernetes", "meaning": "コンテナ管理システム"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "HCI", "full": "Human-Computer Interaction", "meaning": "人間とコンピュータの相互作用"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "AR", "full": "Augmented Reality", "meaning": "拡張現実"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "VR", "full": "Virtual Reality", "meaning": "仮想現実"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "MR", "full": "Mixed Reality", "meaning": "複合現実"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "XR", "full": "Extended Reality", "meaning": "拡張現実全般"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "IoT", "full": "Internet of Things", "meaning": "モノのインターネット"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "BLE", "full": "Bluetooth Low Energy", "meaning": "省電力Bluetooth"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "NFC", "full": "Near Field Communication", "meaning": "近距離無線通信"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "QR", "full": "Quick Response", "meaning": "QRコード"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "OCR", "full": "Optical Character Recognition", "meaning": "光学文字認識"}, {"genre": "03_it_web_dev", "genre_ja": "IT・Web開発", "abbr": "RPA", "full": "Robotic Process Automation", "meaning": "業務自動化"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "就活", "full": "就職活動", "meaning": "就職に向けた活動"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ガクチカ", "full": "学生時代に力を入れたこと", "meaning": "ES・面接で聞かれる経験"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ES", "full": "Entry Sheet", "meaning": "エントリーシート"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "GD", "full": "Group Discussion", "meaning": "グループディスカッション"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "GW", "full": "Group Work", "meaning": "グループワーク"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "SPI", "full": "Synthetic Personality Inventory", "meaning": "適性検査"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "Webテ", "full": "Webテスト", "meaning": "オンライン適性検査"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "インターン", "full": "インターンシップ", "meaning": "就業体験"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "サマイン", "full": "サマーインターン", "meaning": "夏のインターン"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "OB", "full": "Old Boy", "meaning": "男性卒業生"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "OG", "full": "Old Girl", "meaning": "女性卒業生"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "OB訪問", "full": "Old Boy訪問", "meaning": "卒業生訪問"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "OG訪問", "full": "Old Girl訪問", "meaning": "卒業生訪問"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "NNT", "full": "無い内定", "meaning": "内定がない状態"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "GPA", "full": "Grade Point Average", "meaning": "成績平均値"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "AO", "full": "Admissions Office", "meaning": "総合型・AO入試"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ICU", "full": "International Christian University", "meaning": "国際基督教大学"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ELA", "full": "English for Liberal Arts", "meaning": "ICUの英語教育プログラム"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "レポ", "full": "レポート", "meaning": "課題文章"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "プレゼン", "full": "プレゼンテーション", "meaning": "発表"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "リアペ", "full": "リアクションペーパー", "meaning": "授業コメント・小課題"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "シラバス", "full": "syllabus", "meaning": "授業計画"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "履修", "full": "履修登録", "meaning": "授業を取ること"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "落単", "full": "単位を落とす", "meaning": "単位を取れないこと"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "フル単", "full": "フル単位取得", "meaning": "履修した単位を全部取ること"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "必修", "full": "必ず履修する科目", "meaning": "必須科目"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "選必", "full": "選択必修", "meaning": "複数から選ぶ必修科目"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "ゼミ", "full": "ゼミナール", "meaning": "少人数演習"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "卒論", "full": "卒業論文", "meaning": "卒業時の論文"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "修論", "full": "修士論文", "meaning": "修士課程の論文"}, {"genre": "04_university_job_hunting", "genre_ja": "大学・就活", "abbr": "博論", "full": "博士論文", "meaning": "博士課程の論文"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "りょ", "full": "了解", "meaning": "わかった"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おけ", "full": "OK", "meaning": "わかった"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "よろ", "full": "よろしく", "meaning": "よろしく"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おつ", "full": "お疲れ", "meaning": "お疲れ様"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "乙", "full": "お疲れ", "meaning": "お疲れ様"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "あざす", "full": "ありがとうございます", "meaning": "ありがとう"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "すまん", "full": "すみません", "meaning": "ごめん"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ごめ", "full": "ごめん", "meaning": "ごめん"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "まじ", "full": "真面目に / 本当に", "meaning": "本当に"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ガチ", "full": "ガチンコ", "meaning": "本気・本当"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "めちゃ", "full": "めちゃくちゃ", "meaning": "とても"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "めっちゃ", "full": "めちゃくちゃ", "meaning": "とても"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "とりま", "full": "とりあえず、まあ", "meaning": "ひとまず"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ちな", "full": "ちなみに", "meaning": "補足すると"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "てか", "full": "というか", "meaning": "話を変える・補足する"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "なんなら", "full": "何なら", "meaning": "むしろ"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "だる", "full": "だるい", "meaning": "面倒・しんどい"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "めんど", "full": "面倒くさい", "meaning": "面倒"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "きまず", "full": "気まずい", "meaning": "気まずい"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "えぐ", "full": "えぐい", "meaning": "すごい・ひどい"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "きしょ", "full": "気色悪い", "meaning": "気持ち悪い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "かわ", "full": "可愛い", "meaning": "可愛い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "かっこよ", "full": "かっこいい", "meaning": "かっこいい"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おもろ", "full": "面白い", "meaning": "面白い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ねむ", "full": "眠い", "meaning": "眠い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "さむ", "full": "寒い", "meaning": "寒い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "あつ", "full": "暑い", "meaning": "暑い"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ひま", "full": "暇", "meaning": "暇"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おは", "full": "おはよう", "meaning": "朝の挨拶"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "こん", "full": "こんにちは / こんばんは", "meaning": "挨拶"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ばんわ", "full": "こんばんは", "meaning": "夜の挨拶"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "おか", "full": "おかえり", "meaning": "帰宅時の挨拶"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ドタキャン", "full": "土壇場キャンセル", "meaning": "直前キャンセル"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ブッチ", "full": "ぶっちぎる", "meaning": "約束を無視する"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "即レス", "full": "即レスポンス", "meaning": "すぐ返信"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "遅レス", "full": "遅いレスポンス", "meaning": "遅い返信"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "レス", "full": "レスポンス", "meaning": "返信"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "リプ", "full": "リプライ", "meaning": "返信"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ビデ通", "full": "ビデオ通話", "meaning": "映像付き通話"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "カラオケ", "full": "空オーケストラ", "meaning": "歌唱施設・歌うこと"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "オール", "full": "オールナイト", "meaning": "徹夜"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "チケ", "full": "チケット", "meaning": "入場券"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "グッズ", "full": "Goods", "meaning": "商品"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "フェス", "full": "フェスティバル", "meaning": "音楽・文化イベント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ライブ", "full": "Live performance", "meaning": "生演奏・公演"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "インスタ", "full": "Instagram", "meaning": "SNS"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ツイ", "full": "Twitter / X", "meaning": "投稿・SNS"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "リポスト", "full": "Repost", "meaning": "再投稿"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "フォロバ", "full": "フォローバック", "meaning": "フォロー返し"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "鍵垢", "full": "鍵付きアカウント", "meaning": "非公開アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "裏垢", "full": "裏アカウント", "meaning": "別の匿名アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "サブ垢", "full": "サブアカウント", "meaning": "予備アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "本垢", "full": "本アカウント", "meaning": "メインアカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "捨て垢", "full": "捨てアカウント", "meaning": "一時的アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "リア垢", "full": "リアル用アカウント", "meaning": "現実の友人向けアカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "オタ垢", "full": "オタク活動用アカウント", "meaning": "趣味用アカウント"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "スマホ", "full": "スマートフォン", "meaning": "携帯端末"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "パソコン", "full": "パーソナルコンピューター", "meaning": "PC"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "リモコン", "full": "リモートコントローラー", "meaning": "遠隔操作機器"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "エアコン", "full": "エアコンディショナー", "meaning": "空調機"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "アプリ", "full": "アプリケーション", "meaning": "ソフトウェア"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "メアド", "full": "メールアドレス", "meaning": "メールの宛先"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "プロフ", "full": "プロフィール", "meaning": "自己紹介"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "サムネ", "full": "サムネイル", "meaning": "小さな見本画像"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "スクショ", "full": "スクリーンショット", "meaning": "画面保存"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "コピペ", "full": "コピー・アンド・ペースト", "meaning": "複製して貼り付け"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "アプデ", "full": "アップデート", "meaning": "更新"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "インスト", "full": "インストール", "meaning": "導入"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "アンスト", "full": "アンインストール", "meaning": "削除"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "モバ充", "full": "モバイル充電器", "meaning": "モバイルバッテリー"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "コンビニ", "full": "コンビニエンスストア", "meaning": "便利店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "スーパー", "full": "スーパーマーケット", "meaning": "食料品店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "デパート", "full": "デパートメントストア", "meaning": "百貨店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ファミレス", "full": "ファミリーレストラン", "meaning": "家族向け飲食店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ファストフード", "full": "ファストフードレストラン", "meaning": "短時間提供の飲食店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "スタバ", "full": "スターバックス", "meaning": "カフェチェーン"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ミスド", "full": "ミスタードーナツ", "meaning": "ドーナツ店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "サイゼ", "full": "サイゼリヤ", "meaning": "ファミレス"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ドンキ", "full": "ドン・キホーテ", "meaning": "ディスカウント店"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ユニバ", "full": "ユニバーサル・スタジオ・ジャパン", "meaning": "テーマパーク"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "クレカ", "full": "クレジットカード", "meaning": "後払いカード"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "デビカ", "full": "デビットカード", "meaning": "即時引き落としカード"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "電マネ", "full": "電子マネー", "meaning": "電子的決済手段"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ポイ活", "full": "ポイント活動", "meaning": "ポイントを貯める活動"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "サブスク", "full": "サブスクリプション", "meaning": "定額制サービス"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "アマプラ", "full": "Amazon Prime", "meaning": "Amazonの有料会員サービス"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ネトフリ", "full": "Netflix", "meaning": "動画配信サービス"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ググる", "full": "Googleで検索する", "meaning": "検索する"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "飲み放", "full": "飲み放題", "meaning": "定額で飲める形式"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "食べ放", "full": "食べ放題", "meaning": "定額で食べられる形式"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "テイク", "full": "テイクアウト", "meaning": "持ち帰り"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "ウーバー", "full": "Uber Eats", "meaning": "フードデリバリー"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "代引", "full": "代金引換", "meaning": "商品受取時に支払うこと"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "学割", "full": "学生割引", "meaning": "学生向け割引"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "終電", "full": "最終電車", "meaning": "その日の最後の電車"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "始発", "full": "始発電車", "meaning": "その日の最初の電車"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "高速", "full": "高速道路", "meaning": "高速で走れる道路"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "下道", "full": "一般道", "meaning": "高速道路以外の道"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "定期", "full": "定期券", "meaning": "一定期間の乗車券"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "新幹線", "full": "新幹線鉄道", "meaning": "高速鉄道"}, {"genre": "05_daily_life", "genre_ja": "日常生活", "abbr": "地下鉄", "full": "地下鉄道", "meaning": "地下を走る鉄道"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "SNS", "full": "Social Networking Service", "meaning": "ソーシャルメディア"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IG", "full": "Instagram", "meaning": "インスタ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "YT", "full": "YouTube", "meaning": "YouTube"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FB", "full": "Facebook", "meaning": "Facebook"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "DM", "full": "Direct Message", "meaning": "個別メッセージ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "PM", "full": "Private Message", "meaning": "個別メッセージ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "TL", "full": "Timeline", "meaning": "タイムライン"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "RT", "full": "ReTweet", "meaning": "再投稿"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "RP", "full": "Repost", "meaning": "再投稿"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "QT", "full": "Quote Tweet", "meaning": "引用投稿"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FF", "full": "Following / Followers", "meaning": "フォロー・フォロワー関係"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FF外", "full": "フォロー・フォロワー外", "meaning": "相互関係にない人"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "ROM", "full": "Read Only Member", "meaning": "見るだけの人"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "LOL", "full": "Laughing Out Loud", "meaning": "笑い"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "LMAO", "full": "Laughing My Ass Off", "meaning": "大笑い"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "ROFL", "full": "Rolling On the Floor Laughing", "meaning": "転げ回るほど笑う"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "OMG", "full": "Oh My God", "meaning": "驚き"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "WTF", "full": "What The Fuck", "meaning": "驚き・怒り"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IDK", "full": "I Don’t Know", "meaning": "わからない"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IDC", "full": "I Don’t Care", "meaning": "気にしない"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IKR", "full": "I Know, Right?", "meaning": "それな"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "TBH", "full": "To Be Honest", "meaning": "正直言うと"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "NGL", "full": "Not Gonna Lie", "meaning": "正直言うと"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "BTW", "full": "By The Way", "meaning": "ところで"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FYI", "full": "For Your Information", "meaning": "参考までに"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FOMO", "full": "Fear Of Missing Out", "meaning": "取り残される不安"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "YOLO", "full": "You Only Live Once", "meaning": "人生一度きり"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "IRL", "full": "In Real Life", "meaning": "現実世界で"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "AFK", "full": "Away From Keyboard", "meaning": "離席中"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "BRB", "full": "Be Right Back", "meaning": "すぐ戻る"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "GTG", "full": "Got To Go", "meaning": "行かなきゃ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "TTYL", "full": "Talk To You Later", "meaning": "また後で"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "Plz / pls", "full": "Please", "meaning": "お願い"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "Thx / tx", "full": "Thanks", "meaning": "ありがとう"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "TY", "full": "Thank You", "meaning": "ありがとう"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "np", "full": "No Problem", "meaning": "問題ない"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "smh", "full": "Shaking My Head", "meaning": "あきれた"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "bff", "full": "Best Friends Forever", "meaning": "親友"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "POV", "full": "Point of View", "meaning": "視点・一人称視点"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "GRWM", "full": "Get Ready With Me", "meaning": "準備動画"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "OOTD", "full": "Outfit Of The Day", "meaning": "今日の服装"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FYP", "full": "For You Page", "meaning": "TikTokなどのおすすめ欄"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "ASMR", "full": "Autonomous Sensory Meridian Response", "meaning": "音・感覚系コンテンツ"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "FAQ", "full": "Frequently Asked Questions", "meaning": "よくある質問"}, {"genre": "06_sns_internet", "genre_ja": "SNS・ネット", "abbr": "AMA", "full": "Ask Me Anything", "meaning": "何でも質問して"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "マイナ", "full": "マイナンバー", "meaning": "個人番号"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "マイナカード", "full": "マイナンバーカード", "meaning": "個人番号カード"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "保険証", "full": "健康保険証", "meaning": "医療保険の証明"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "免許証", "full": "運転免許証", "meaning": "運転資格証明"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "学生証", "full": "学生身分証", "meaning": "学生である証明"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "診察券", "full": "診察カード", "meaning": "病院の患者カード"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "処方箋", "full": "処方せん", "meaning": "薬の指示書"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "OTC", "full": "Over The Counter", "meaning": "市販薬"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "ICU", "full": "Intensive Care Unit", "meaning": "集中治療室"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "ER", "full": "Emergency Room", "meaning": "救急外来"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "MRI", "full": "Magnetic Resonance Imaging", "meaning": "磁気共鳴画像"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "CT", "full": "Computed Tomography", "meaning": "コンピュータ断層撮影"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "PCR", "full": "Polymerase Chain Reaction", "meaning": "遺伝子増幅検査"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "リハビリ", "full": "Rehabilitation", "meaning": "機能回復訓練"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "インフル", "full": "インフルエンザ", "meaning": "感染症"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "コロナ", "full": "コロナウイルス感染症", "meaning": "感染症"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "アレルギー", "full": "allergy", "meaning": "免疫反応"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "メンタル", "full": "mental health", "meaning": "精神面"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "皮膚科", "full": "皮膚科学科", "meaning": "皮膚の診療科"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "耳鼻科", "full": "耳鼻咽喉科", "meaning": "耳・鼻・喉の診療科"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "整形", "full": "整形外科 / 美容整形", "meaning": "骨・関節、または美容手術"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "自賠責", "full": "自動車損害賠償責任保険", "meaning": "自動車の強制保険"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "国保", "full": "国民健康保険", "meaning": "自営業者などの健康保険"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "社保", "full": "社会保険", "meaning": "会社員などの保険"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "源泉", "full": "源泉徴収", "meaning": "給与から税を引く仕組み"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "確申", "full": "確定申告", "meaning": "所得税などの申告"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "住民税", "full": "住民に課される税", "meaning": "地方税"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "所得税", "full": "所得にかかる税", "meaning": "国税"}, {"genre": "07_medical_admin_life", "genre_ja": "医療・行政", "abbr": "e-Tax", "full": "Electronic Tax", "meaning": "電子申告システム"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "JR", "full": "Japan Railways", "meaning": "JR各社"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "IC", "full": "Integrated Circuit", "meaning": "ICカード・インターチェンジ"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ETC", "full": "Electronic Toll Collection", "meaning": "自動料金収受システム"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "SA", "full": "Service Area", "meaning": "サービスエリア"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "PA", "full": "Parking Area", "meaning": "パーキングエリア"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "JCT", "full": "Junction", "meaning": "道路の分岐点"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "LCC", "full": "Low Cost Carrier", "meaning": "格安航空会社"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "FSC", "full": "Full Service Carrier", "meaning": "フルサービス航空会社"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ANA", "full": "All Nippon Airways", "meaning": "全日本空輸"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "JAL", "full": "Japan Airlines", "meaning": "日本航空"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ETA", "full": "Estimated Time of Arrival", "meaning": "到着予定時刻"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ETD", "full": "Estimated Time of Departure", "meaning": "出発予定時刻"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "STA", "full": "Scheduled Time of Arrival", "meaning": "定刻到着時刻"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "STD", "full": "Scheduled Time of Departure", "meaning": "定刻出発時刻"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "ESTA", "full": "Electronic System for Travel Authorization", "meaning": "米国電子渡航認証"}, {"genre": "08_transport_travel", "genre_ja": "交通・旅行", "abbr": "eTA", "full": "Electronic Travel Authorization", "meaning": "電子渡航認証"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "リハ", "full": "リハーサル", "meaning": "練習"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ゲネ", "full": "ゲネプロ / Generalprobe", "meaning": "本番同様の通し稽古"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "オーデ", "full": "オーディション", "meaning": "審査"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ロケ", "full": "ロケーション撮影", "meaning": "屋外・現地撮影"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ロケハン", "full": "ロケーション・ハンティング", "meaning": "撮影場所探し"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ナレ", "full": "ナレーション", "meaning": "語り"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "アフレコ", "full": "アフター・レコーディング", "meaning": "後から声を録ること"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "アテレコ", "full": "当てレコーディング", "meaning": "映像に声を当てること"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "バミリ", "full": "場見る / 場所を見る目印", "meaning": "立ち位置の印"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MA", "full": "Multi Audio", "meaning": "音声仕上げ"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "BGM", "full": "Background Music", "meaning": "背景音楽"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "SE", "full": "Sound Effect", "meaning": "効果音"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "SFX", "full": "Special Effects", "meaning": "特殊効果"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "VFX", "full": "Visual Effects", "meaning": "視覚効果"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "CG", "full": "Computer Graphics", "meaning": "コンピュータグラフィックス"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "CGI", "full": "Computer Generated Imagery", "meaning": "コンピュータ生成映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "LUT", "full": "Look Up Table", "meaning": "色変換データ"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "RAW", "full": "Raw data", "meaning": "未加工データ"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "JPEG", "full": "Joint Photographic Experts Group", "meaning": "画像形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "PNG", "full": "Portable Network Graphics", "meaning": "画像形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MP4", "full": "MPEG-4 Part 14", "meaning": "動画形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MOV", "full": "QuickTime Movie", "meaning": "動画形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "WAV", "full": "Waveform Audio File Format", "meaning": "音声形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MP3", "full": "MPEG Audio Layer-3", "meaning": "音声形式"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "fps", "full": "frames per second", "meaning": "1秒あたりのフレーム数"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "4K", "full": "4000前後の横画素数", "meaning": "高解像度映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "HD", "full": "High Definition", "meaning": "高精細映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "FHD", "full": "Full High Definition", "meaning": "フルHD"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "SD", "full": "Standard Definition", "meaning": "標準画質"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "MV", "full": "Music Video", "meaning": "音楽映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "PV", "full": "Promotion Video", "meaning": "宣伝映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "CM", "full": "Commercial Message", "meaning": "広告映像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "OP", "full": "Opening", "meaning": "冒頭映像・曲"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "ED", "full": "Ending", "meaning": "終了映像・曲"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "B-roll", "full": "補助映像", "meaning": "メイン映像を補う素材"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "サムネ", "full": "サムネイル", "meaning": "見本画像"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "テロップ", "full": "television opaque projector由来", "meaning": "画面上の文字"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "完パケ", "full": "完全パッケージ", "meaning": "完成済み納品物"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "初稿", "full": "最初の原稿", "meaning": "最初の案"}, {"genre": "09_creative_video_stage", "genre_ja": "クリエイティブ", "abbr": "再稿", "full": "再提出原稿", "meaning": "修正版"}]
 ;
 
-const GENRE_META = {
-  '01_business':             { label: 'ビジネス',         icon: '💼' },
-  '02_email_chat':           { label: 'メール・チャット', icon: '✉️' },
-  '03_it_web_dev':           { label: 'IT・Web開発',      icon: '💻' },
-  '04_university_job_hunting':{ label: '大学・就活',       icon: '🎓' },
-  '05_daily_life':           { label: '日常生活',          icon: '☕' },
-  '06_sns_internet':         { label: 'SNS・ネット',       icon: '📱' },
-  '07_medical_admin_life':   { label: '医療・行政',        icon: '🏥' },
-  '08_transport_travel':     { label: '交通・旅行',        icon: '✈️' },
-  '09_creative_video_stage': { label: 'クリエイティブ',   icon: '🎬' },
+const GENRE_META={
+  '01_business':{label:'ビジネス',icon:'💼'},
+  '02_email_chat':{label:'メール・チャット',icon:'✉️'},
+  '03_it_web_dev':{label:'IT・Web開発',icon:'💻'},
+  '04_university_job_hunting':{label:'大学・就活',icon:'🎓'},
+  '05_daily_life':{label:'日常生活',icon:'☕'},
+  '06_sns_internet':{label:'SNS・ネット',icon:'📱'},
+  '07_medical_admin_life':{label:'医療・行政',icon:'🏥'},
+  '08_transport_travel':{label:'交通・旅行',icon:'✈️'},
+  '09_creative_video_stage':{label:'クリエイティブ',icon:'🎬'},
 };
 
-const QUIZ_LEN = 10;
+const QUIZ_LEN=10;
+let currentGenre='all',deck=[],pointer=0,correctN=0,wrongN=0;
+let combo=0,maxCombo=0,answered=false,missedQ=[];
+// combo・maxComboはページを閉じるまで継続
+let soundOn=true;
 
-let currentGenre = 'all';
-let deck = [];
-let pointer = 0;
-let correctN = 0;
-let wrongN = 0;
-let answered = false;
+// ---- Web Audio Sound Engine ----
+const AudioCtx=window.AudioContext||window.webkitAudioContext;
+let ac=null;
+function getAC(){
+  if(!ac)ac=new AudioCtx();
+  if(ac.state==='suspended')ac.resume();
+  return ac;
+}
+function playTone(freq,type,t,dur,vol,fade=true){
+  const a=getAC();
+  const osc=a.createOscillator();
+  const g=a.createGain();
+  osc.connect(g);g.connect(a.destination);
+  osc.type=type;
+  osc.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(vol,t);
+  if(fade)g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  osc.start(t);osc.stop(t+dur+0.01);
+}
+function sfx(fn){if(soundOn)fn()}
 
-// ---- ジャンル画面構築 ----
-function buildGenreGrid() {
-  const grid = document.getElementById('genre-grid');
-  const counts = {};
-  RAW.forEach(r => { counts[r.genre] = (counts[r.genre] || 0) + 1; });
+function sfxCorrect(){
+  const a=getAC(),t=a.currentTime;
+  playTone(523,'sine',t,0.12,0.35);
+  playTone(784,'sine',t+0.1,0.18,0.3);
+}
+function sfxCombo(n){
+  const a=getAC(),t=a.currentTime;
+  let f=0,vol=0.35;
+  if(n>=30){f=1760;vol=0.5;}
+  else if(n>=15){f=1319;vol=0.42;}
+  else if(n>=10){f=1047;vol=0.4;}
+  else if(n>=5){f=784;vol=0.38;}
+  else if(n>=2){f=659;vol=0.32;}
+  if(!f)return;
+  playTone(f,'sine',t,0.1,vol);
+  playTone(f*1.5,'triangle',t+0.07,0.12,vol*0.55);
+  if(n>=10)playTone(f*2,'sine',t+0.12,0.08,vol*0.35);
+}
+function sfxWrong(){
+  const a=getAC(),t=a.currentTime;
+  playTone(280,'sawtooth',t,0.1,0.28);
+  playTone(200,'sawtooth',t+0.09,0.15,0.22);
+}
+function sfxStart(){
+  const a=getAC(),t=a.currentTime;
+  [262,330,392,523].forEach((f,i)=>playTone(f,'sine',t+i*0.07,0.15,0.28));
+}
+function sfxFanfare(){
+  const a=getAC(),t=a.currentTime;
+  [[523,0,0.15],[523,0.12,0.15],[523,0.24,0.15],[659,0.36,0.35],[587,0.58,0.12],[523,0.72,0.5]]
+    .forEach(([f,d,dur])=>{
+      playTone(f,'sine',t+d,dur,0.38);
+      playTone(f*1.25,'triangle',t+d,dur,0.14);
+    });
+}
+function sfxSad(){
+  const a=getAC(),t=a.currentTime;
+  playTone(392,'sine',t,0.2,0.28);
+  playTone(330,'sine',t+0.18,0.2,0.28);
+  playTone(262,'sine',t+0.36,0.35,0.22);
+}
+function sfxNext(){
+  const a=getAC(),t=a.currentTime;
+  playTone(440,'sine',t,0.06,0.18);
+}
 
-  Object.entries(GENRE_META).forEach(([key, meta]) => {
-    const btn = document.createElement('button');
-    btn.className = 'genre-btn';
-    btn.innerHTML = `<div class="g-name">${meta.icon} ${meta.label}</div><div class="g-count">${counts[key] || 0}問</div>`;
-    btn.onclick = () => startQuiz(key);
+// 音量トグル
+function toggleSound(){
+  soundOn=!soundOn;
+  const btn=document.getElementById('sound-toggle');
+  btn.textContent=soundOn?'🔊':'🔇';
+  btn.classList.toggle('muted',!soundOn);
+  if(!soundOn) stopBGM();
+  else if(document.getElementById('home-screen').style.display!=='none') startBGM('home');
+  else if(document.getElementById('quiz-screen').style.display!=='none') startBGM('quiz');
+}
+
+
+// ---- BGM Engine ----
+let bgmPlaying = false;
+let bgmNodes = [];
+let bgmInterval = null;
+
+const BGM_BPM = 128;
+const BGM_BEAT = 60 / BGM_BPM;
+
+// ホームBGM: 明るいポップなループ
+const HOME_MELODY = [
+  [523,0],[659,1],[784,2],[659,3],
+  [523,4],[587,5],[659,6],[523,7],
+  [440,8],[523,9],[659,10],[523,11],
+  [392,12],[440,13],[523,14],[392,15],
+];
+
+// クイズBGM: テンポ良いリズム感
+const QUIZ_MELODY = [
+  [392,0],[523,0.5],[659,1],[523,1.5],
+  [784,2],[659,2.5],[523,3],[440,3.5],
+  [392,4],[440,4.5],[523,5],[587,5.5],
+  [523,6],[440,6.5],[392,7],[330,7.5],
+];
+
+function playBGMLoop(melody, loopLen=8) {
+  if (!soundOn) return;
+  const a = getAC();
+  const startTime = a.currentTime + 0.05;
+
+  melody.forEach(([freq, beat]) => {
+    const t = startTime + beat * BGM_BEAT;
+    const osc = a.createOscillator();
+    const gain = a.createGain();
+    osc.connect(gain); gain.connect(a.destination);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.06, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + BGM_BEAT * 0.8);
+    osc.start(t); osc.stop(t + BGM_BEAT * 0.85);
+    bgmNodes.push(osc);
+  });
+
+  return startTime + loopLen * BGM_BEAT;
+}
+
+let bgmMode = '';
+let bgmNextTime = 0;
+let bgmRAF = null;
+
+function startBGM(mode) {
+  if (!soundOn) return;
+  stopBGM();
+  bgmMode = mode;
+  bgmPlaying = true;
+  scheduleBGM();
+}
+
+function scheduleBGM() {
+  if (!bgmPlaying || !soundOn) return;
+  const a = getAC();
+  if (a.currentTime >= bgmNextTime - 0.1) {
+    const melody = bgmMode === 'home' ? HOME_MELODY : QUIZ_MELODY;
+    const loopLen = bgmMode === 'home' ? 16 : 8;
+    bgmNextTime = playBGMLoop(melody, loopLen);
+  }
+  bgmRAF = setTimeout(scheduleBGM, 500);
+}
+
+function stopBGM() {
+  bgmPlaying = false;
+  if (bgmRAF) { clearTimeout(bgmRAF); bgmRAF = null; }
+  bgmNodes.forEach(n => { try { n.stop(); } catch(e) {} });
+  bgmNodes = [];
+  bgmNextTime = 0;
+}
+
+// ---- パーティクル ----
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let particles=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+function spawnParticles(x,y,colors,count=28){
+  for(let i=0;i<count;i++){
+    const angle=Math.random()*Math.PI*2,speed=Math.random()*7+2;
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    particles.push({x,y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-4,
+      life:1,decay:Math.random()*0.02+0.018,size:Math.random()*6+3,color,
+      shape:Math.random()>0.5?'circle':'square'});
+  }
+}
+function animParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles=particles.filter(p=>p.life>0);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.2;p.life-=p.decay;
+    ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();
+    if(p.shape==='square')ctx.rect(p.x-p.size/2,p.y-p.size/2,p.size,p.size);
+    else ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  if(particles.length>0)requestAnimationFrame(animParticles);
+}
+function triggerParticles(el,colors){
+  const r=el.getBoundingClientRect();
+  spawnParticles(r.left+r.width/2,r.top+r.height/2,colors);
+  animParticles();
+}
+
+// ---- コンボポップアップ ----
+function showComboPopup(n){
+  const el=document.getElementById('combo-popup');
+  let text='', color='', size='60px';
+  if(n>=30){text='GODLIKE...';color='#a855f7';size='72px';}
+  else if(n>=15){text='FEVER STREAK!';color='#e11d48';size='52px';}
+  else if(n>=10){text='SUPER FEVER!!';color='#d97706';size='46px';}
+  else if(n>=5){text='FEVER! 🔥';color='#059669';size='60px';}
+  else if(n>=2){text='DOUBLE!';color='#0284c7';size='60px';}
+  else return;
+  el.textContent=text;
+  el.style.color=color;
+  el.style.fontSize=size;
+  el.style.animation='none';void el.offsetHeight;
+  el.style.animation='comboAnim 1.2s ease forwards';
+}
+
+// ---- ナビゲーション ----
+function show(id){
+  ['home-screen','genre-screen','quiz-screen','result-screen']
+    .forEach(s=>document.getElementById(s).style.display=s===id?'block':'none');
+}
+function goHome(){show('home-screen');startBGM('home')}
+function goGenre(){show('genre-screen');stopBGM()}
+
+// ---- ジャンルグリッド ----
+function buildGenre(){
+  const grid=document.getElementById('genre-grid');
+  const counts={};RAW.forEach(r=>{counts[r.genre]=(counts[r.genre]||0)+1});
+  Object.entries(GENRE_META).forEach(([key,meta])=>{
+    const btn=document.createElement('button');
+    btn.className='genre-btn';
+    btn.innerHTML=`<span class="g-icon">${meta.icon}</span><div class="g-name">${meta.label}</div><div class="g-count">${counts[key]||0}問</div>`;
+    btn.onclick=()=>startQuiz(key);
     grid.appendChild(btn);
   });
 }
 
-// ---- シャッフル ----
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 // ---- クイズ開始 ----
-function startQuiz(genre) {
-  currentGenre = genre;
-  const pool = genre === 'all' ? [...RAW] : RAW.filter(r => r.genre === genre);
-  deck = shuffle(pool).slice(0, Math.min(QUIZ_LEN, pool.length));
-  pointer = 0;
-  correctN = 0;
-  wrongN = 0;
-
-  document.getElementById('genre-screen').style.display = 'none';
-  document.getElementById('result-screen').style.display = 'none';
-  document.getElementById('quiz-screen').style.display = 'block';
-
-  showQuestion();
+function startQuiz(genre){
+  currentGenre=genre;
+  const pool=genre==='all'?[...RAW]:genre==='__weak__'?loadWeak():RAW.filter(r=>r.genre===genre);
+  deck=shuffle(pool).slice(0,Math.min(QUIZ_LEN,pool.length));
+  pointer=0;correctN=0;wrongN=0;missedQ=[];  // combo・maxComboはリセットしない
+  show('quiz-screen');
+  sfx(sfxStart);
+  setTimeout(()=>startBGM('quiz'),400);
+  showQ();
 }
 
 // ---- 問題表示 ----
-function showQuestion() {
-  answered = false;
-  const q = deck[pointer];
-  const total = deck.length;
+function showQ(){
+  answered=false;
+  const q=deck[pointer],total=deck.length;
+  document.getElementById('prog-bar').style.width=(pointer/total*100)+'%';
+  document.getElementById('q-num').textContent=(pointer+1)+'/'+total;
+  document.getElementById('sc-ok').textContent=correctN;
+  document.getElementById('sc-ng').textContent=wrongN;
+  const meta=GENRE_META[q.genre]||{label:q.genre_ja,icon:''};
+  document.getElementById('q-genre').textContent=meta.icon+' '+meta.label;
+  document.getElementById('q-abbr').textContent=q.abbr;
+  document.getElementById('q-full').textContent=q.full||'';
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+  document.getElementById('q-card').className='q-card animate-in';
+  updateCombo();
 
-  document.getElementById('prog-bar').style.width = (pointer / total * 100) + '%';
-  document.getElementById('q-counter').textContent = (pointer + 1) + ' / ' + total;
-  document.getElementById('sc-correct').textContent = correctN;
-  document.getElementById('sc-wrong').textContent = wrongN;
-
-  const meta = GENRE_META[q.genre] || { label: q.genre_ja, icon: '' };
-  document.getElementById('q-genre').textContent = meta.icon + ' ' + meta.label;
-  document.getElementById('q-abbr').textContent = q.abbr;
-  document.getElementById('q-full').textContent = q.full || '';
-
-  document.getElementById('feedback').style.display = 'none';
-  document.getElementById('next-btn').style.display = 'none';
-
-  // 選択肢生成
-  const pool = currentGenre === 'all' ? RAW : RAW.filter(r => r.genre === currentGenre);
-  const distractors = shuffle(pool.filter(r => r.meaning !== q.meaning && r.abbr !== q.abbr))
-    .slice(0, 3)
-    .map(r => r.meaning);
-
-  const choices = shuffle([q.meaning, ...distractors]);
-  const container = document.getElementById('choices');
-  container.innerHTML = '';
-
-  choices.forEach(c => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.textContent = c;
-    btn.onclick = () => selectAnswer(btn, c, q.meaning, choices);
-    container.appendChild(btn);
+  const pool=currentGenre==='all'||currentGenre==='__weak__'?RAW:RAW.filter(r=>r.genre===currentGenre);
+  const distractors=shuffle(pool.filter(r=>r.meaning!==q.meaning&&r.abbr!==q.abbr)).slice(0,3).map(r=>r.meaning);
+  const choices=shuffle([q.meaning,...distractors]);
+  const cont=document.getElementById('choices');cont.innerHTML='';
+  choices.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';btn.textContent=c;
+    btn.onclick=()=>answer(btn,c,q);
+    cont.appendChild(btn);
   });
 }
 
-// ---- 回答処理 ----
-function selectAnswer(clickedBtn, selected, correct, allChoices) {
-  if (answered) return;
-  answered = true;
+function getComboInfo(n){
+  if(n>=30) return {text:'GODLIKE...',cls:'cb-god'};
+  if(n>=15) return {text:'FEVER STREAK!',cls:'cb5'};
+  if(n>=10) return {text:'SUPER FEVER!!',cls:'cb4'};
+  if(n>=5)  return {text:'FEVER! 🔥',cls:'cb3'};
+  if(n>=2)  return {text:'DOUBLE!',cls:'cb1'};
+  return null;
+}
 
-  const allBtns = document.querySelectorAll('.choice-btn');
-  allBtns.forEach(b => {
-    b.disabled = true;
-    if (b.textContent === correct) b.classList.add('correct');
-    else if (b === clickedBtn && selected !== correct) b.classList.add('wrong');
+function updateCombo(){
+  const el=document.getElementById('combo-badge');
+  const info=getComboInfo(combo);
+  if(info){
+    el.textContent=info.text;
+    el.className='combo-badge show '+info.cls;
+  } else {
+    el.className='combo-badge';
+  }
+}
+
+// ---- 回答 ----
+function answer(clickedBtn,selected,q){
+  if(answered)return;
+  answered=true;
+  const correct=q.meaning;
+  document.querySelectorAll('.choice-btn').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct)b.classList.add('correct');
+    else if(b===clickedBtn&&selected!==correct)b.classList.add('wrong');
     else b.classList.add('dim');
   });
-
-  const feedback = document.getElementById('feedback');
-  if (selected === correct) {
-    correctN++;
-    feedback.className = 'feedback-box correct';
-    feedback.textContent = '✓ 正解！';
+  const fb=document.getElementById('feedback');
+  const card=document.getElementById('q-card');
+  if(selected===correct){
+    correctN++;combo++;if(combo>maxCombo)maxCombo=combo;
+    card.classList.add('flash-correct');
+    triggerParticles(clickedBtn,['#a855f7','#ec4899','#f59e0b','#10b981']);
+    removeFromWeak(q);
+    const showPopup = combo===2||combo===5||combo===10||(combo>=15&&combo%5===0);
+    if(showPopup) showComboPopup(combo);
+    sfx(sfxCorrect);
+    if(showPopup)setTimeout(()=>sfx(()=>sfxCombo(combo)),150);
+    fb.className='feedback-box correct';
+    fb.innerHTML='✓ 正解！'+(q.full?`<br><span style="font-size:11px;font-weight:500">${q.full}</span>`:'');
   } else {
-    wrongN++;
-    feedback.className = 'feedback-box wrong';
-    feedback.textContent = '✗ 不正解。正解は「' + correct + '」でした。';
+    wrongN++;combo=0;
+    card.classList.add('flash-wrong');
+    triggerParticles(clickedBtn,['#f43f5e','#fda4af']);
+    missedQ.push(q);
+    addToWeak(q);
+    sfx(sfxWrong);
+    fb.className='feedback-box wrong';
+    fb.innerHTML=`✗ 不正解。正解は <span class="ans-highlight">「${correct}」</span><br><span style="font-size:11px;font-weight:500">${q.full||''}</span>`;
   }
-  feedback.style.display = 'block';
-  document.getElementById('next-btn').style.display = 'block';
+  fb.style.display='block';
+  document.getElementById('next-btn').style.display='block';
+  document.getElementById('sc-ok').textContent=correctN;
+  document.getElementById('sc-ng').textContent=wrongN;
+  updateCombo();
 }
 
-// ---- 次の問題 ----
-function nextQuestion() {
-  pointer++;
-  if (pointer >= deck.length) {
-    showResult();
-  } else {
-    showQuestion();
-  }
+function nextQ(){
+  sfx(sfxNext);
+  pointer++;pointer>=deck.length?showResult():showQ();
 }
 
 // ---- リザルト ----
-function showResult() {
-  document.getElementById('quiz-screen').style.display = 'none';
-  document.getElementById('result-screen').style.display = 'block';
-
-  const total = deck.length;
-  const pct = Math.round(correctN / total * 100);
-
-  let emoji = '😢', title = 'もう少し練習しよう';
-  if (pct >= 90) { emoji = '🏆'; title = '完璧！！'; }
-  else if (pct >= 70) { emoji = '🎉'; title = 'すごい！'; }
-  else if (pct >= 50) { emoji = '💪'; title = 'いい調子！'; }
-
-  document.getElementById('result-emoji').textContent = emoji;
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-score').textContent = pct + '%';
-  document.getElementById('result-sub').textContent = total + '問中 ' + correctN + '問正解';
-  document.getElementById('rs-correct').textContent = correctN;
-  document.getElementById('rs-wrong').textContent = wrongN;
+function showResult(){
+  show('result-screen');
+  stopBGM();
+  const total=deck.length,pct=Math.round(correctN/total*100);
+  let mascot='😢',title='もう少し！';
+  if(pct>=90){mascot='🏆';title='パーフェクト！';setTimeout(()=>sfx(sfxFanfare),300)}
+  else if(pct>=70){mascot='🎉';title='すごい！';setTimeout(()=>sfx(sfxFanfare),300)}
+  else if(pct>=50){mascot='💪';title='いい感じ！';setTimeout(()=>sfx(sfxSad),300)}
+  else{setTimeout(()=>sfx(sfxSad),300)}
+  document.getElementById('r-mascot').textContent=mascot;
+  document.getElementById('r-title').textContent=title;
+  document.getElementById('r-pct').textContent=pct+'%';
+  document.getElementById('r-sub').textContent=total+'問中 '+correctN+'問正解';
+  document.getElementById('r-ok').textContent=correctN;
+  document.getElementById('r-ng').textContent=wrongN;
+  document.getElementById('r-combo').textContent=maxCombo;
+  const ms=document.getElementById('miss-section');
+  if(missedQ.length>0){
+    ms.innerHTML='<div class="miss-title">間違えた問題の復習</div>'+
+      missedQ.map(q=>`<div class="miss-item"><div class="miss-abbr">${q.abbr}</div><div><div class="miss-meaning">${q.meaning}</div><div class="miss-full">${q.full||''}</div></div></div>`).join('');
+  } else {
+    ms.innerHTML='<div style="text-align:center;color:var(--correct);font-weight:900;margin-top:16px;font-size:15px">🌟 全問正解！完璧です！</div>';
+  }
+  // スコア別パーティクル演出
+  const fireworks = () => {
+    const cols1=['#a855f7','#ec4899','#f59e0b','#fff'];
+    const cols2=['#10b981','#06b6d4','#fbbf24','#fff'];
+    const cx=window.innerWidth/2, cy=window.innerHeight*0.3;
+    if(pct>=90){
+      spawnParticles(cx,cy,cols1,60);
+      setTimeout(()=>{spawnParticles(cx*0.4,cy*1.1,cols2,50);spawnParticles(cx*1.6,cy*1.1,cols1,50)},300);
+      setTimeout(()=>{spawnParticles(cx,cy*0.5,['#ffd700','#fff','#a855f7'],70)},600);
+    } else if(pct>=70){
+      spawnParticles(cx*0.4,cy,cols1,45);
+      spawnParticles(cx*1.6,cy,cols2,45);
+      setTimeout(()=>spawnParticles(cx,cy*1.2,cols1,40),350);
+    } else if(pct>=50){
+      spawnParticles(cx,cy,cols2,35);
+    }
+    animParticles();
+  };
+  setTimeout(fireworks,350);
 }
 
-// ---- リトライ ----
-function retryQuiz() { startQuiz(currentGenre); }
+function retryQuiz(){startQuiz(currentGenre)}
 
-// ---- 戻る ----
-function goGenreSelect() {
-  document.getElementById('result-screen').style.display = 'none';
-  document.getElementById('quiz-screen').style.display = 'none';
-  document.getElementById('genre-screen').style.display = 'block';
+
+// ---- 苦手問題集 (localStorage) ----
+const WEAK_KEY = 'ryakugo_weak_v1';
+
+function loadWeak() {
+  try {
+    return JSON.parse(localStorage.getItem(WEAK_KEY) || '[]');
+  } catch(e) { return []; }
 }
 
-buildGenreGrid();
+function saveWeak(arr) {
+  try { localStorage.setItem(WEAK_KEY, JSON.stringify(arr)); } catch(e) {}
+}
+
+// 間違えた問題を蓄積（abbrをキーに重複排除）
+function addToWeak(q) {
+  const arr = loadWeak();
+  const exists = arr.some(w => w.abbr === q.abbr && w.genre === q.genre);
+  if (!exists) arr.push({genre:q.genre,genre_ja:q.genre_ja,abbr:q.abbr,full:q.full,meaning:q.meaning});
+  saveWeak(arr);
+  updateWeakBtn();
+}
+
+// 正解したら苦手リストから削除
+function removeFromWeak(q) {
+  const arr = loadWeak().filter(w => !(w.abbr === q.abbr && w.genre === q.genre));
+  saveWeak(arr);
+  updateWeakBtn();
+}
+
+function clearWeak() {
+  saveWeak([]);
+  updateWeakBtn();
+}
+
+function updateWeakBtn() {
+  const arr = loadWeak();
+  const btn = document.getElementById('weak-btn');
+  const badge = document.getElementById('weak-count');
+  if (!btn) return;
+  if (arr.length === 0) {
+    btn.style.display = 'none';
+  } else {
+    btn.style.display = 'flex';
+    badge.textContent = arr.length;
+  }
+}
+
+function startWeakQuiz() {
+  const arr = loadWeak();
+  if (arr.length === 0) return;
+  currentGenre = '__weak__';
+  deck = shuffle([...arr]).slice(0, Math.min(QUIZ_LEN, arr.length));
+  pointer = 0; correctN = 0; wrongN = 0; missedQ = [];
+  show('quiz-screen');
+  sfx(sfxStart);
+  setTimeout(() => startBGM('quiz'), 400);
+  showQ();
+}
+
+buildGenre();
+updateWeakBtn();
 </script>
 </body>
 </html>
